@@ -1,4 +1,4 @@
-import ChatInterface from "@/components/NewChat";
+import ChatInterface from "@/components/ChatInterface";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 

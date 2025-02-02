@@ -4,10 +4,9 @@ import React from 'react'
 import {getUserChats, onboardUser} from '@/app/actions'
 import { revalidatePath } from "next/cache";
 
-import ChatInterface from "@/components/NewChat";
+import ChatInterface from "@/components/ChatInterface";
 
-export const  Home = async({params}) => {
-  console.log('params', params)
+export const  Home = async() => {
   
   const session = await auth();
 console.log('signed in, top level session', session)

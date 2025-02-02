@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import React from 'react'
+import React, { Suspense } from 'react'
 import {getUserChats, onboardUser} from '@/app/actions'
 import { revalidatePath } from "next/cache";
 import { SideBar } from "@/components/SideBar";
@@ -30,7 +30,7 @@ console.log('signed in, top level session', session)
 
           const newUserID = await onboardUser(session.userId);
           revalidatePath('/')
-          return redirect(`/f/${newUserID}`);
+          return redirect(`/`);
         }}
       >
         <button>Create new Chat</button>
@@ -38,10 +38,10 @@ console.log('signed in, top level session', session)
     );
   }
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
     <SideBar userChats={userChats}/>
 <ChatInterface />
-    </>
+    </Suspense>
   )
 }
 

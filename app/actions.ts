@@ -57,7 +57,7 @@ export const getUserChats = async (userId: string) => {
 };
 
 // Create a new chat
-export const createChat = async (userId: string, chatName: string) => {
+export const createChat = async (userId: any, chatName: string) => {
   try {
     
     if (!userId) {

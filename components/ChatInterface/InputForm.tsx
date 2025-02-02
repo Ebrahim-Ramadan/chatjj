@@ -12,6 +12,7 @@ const InputForm = ({ input, isLoading, setInput, handleSubmit }: InputFormProps)
     <form onSubmit={handleSubmit} className="sticky bottom-0 p-2">
       <div className="flex items-center gap-2 w-full max-w-xl mx-auto">
         <input
+          autoFocus
           className="flex-1 p-4 border-2 border-neutral-600 rounded shadow-xl w-full text-white bg-neutral-800"
           value={input}
           placeholder={isLoading ? "Sending..." : "Type your message..."}
