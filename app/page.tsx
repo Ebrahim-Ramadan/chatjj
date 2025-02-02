@@ -4,7 +4,7 @@ import React from 'react'
 import {getUserChats, onboardUser} from '@/app/actions'
 import { revalidatePath } from "next/cache";
 import { SideBar } from "@/components/SideBar";
-import ChatInterface from "@/components/NewChat";
+import ChatInterface from "@/components/ChatInterface";
 export const  Home = async() => {
   const session = await auth();
 console.log('signed in, top level session', session)
@@ -39,7 +39,7 @@ console.log('signed in, top level session', session)
   }
   return (
     <>
-    {/* <SideBar userChats={userChats}/> */}
+    <SideBar userChats={userChats}/>
 <ChatInterface />
     </>
   )

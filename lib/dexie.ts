@@ -5,7 +5,7 @@ export interface ChatMessage {
   role: "user" | "assistant"
   content: string
   timestamp: Date
-  chatId: number
+  chatId: any
 }
 
 export class MyDatabase extends Dexie {

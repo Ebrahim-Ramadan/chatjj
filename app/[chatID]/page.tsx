@@ -3,9 +3,12 @@ import { redirect } from "next/navigation";
 import React from 'react'
 import {getUserChats, onboardUser} from '@/app/actions'
 import { revalidatePath } from "next/cache";
-import { SideBar } from "@/components/SideBar";
+
 import ChatInterface from "@/components/NewChat";
-export const  Home = async() => {
+
+export const  Home = async({params}) => {
+  console.log('params', params)
+  
   const session = await auth();
 console.log('signed in, top level session', session)
 

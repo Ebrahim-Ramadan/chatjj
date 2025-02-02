@@ -18,12 +18,19 @@ export async function POST(req: Request) {
       });
 
       for await (const part of response) {
-        controller.enqueue(part.message.content);
+        // Encode the response chunk as a Uint8Array
+        const chunk = new TextEncoder().encode(part.message.content);
+        controller.enqueue(chunk);
       }
 
       controller.close();
     },
   });
 
-  return new NextResponse(stream);
+  // Return the stream as the response
+  return new NextResponse(stream, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
 }
