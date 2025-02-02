@@ -16,3 +16,10 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(), // Timestamp when the user was created
   updatedAt: timestamp("updated_at").defaultNow().notNull(), // Timestamp when the user was last updated
 });
+
+export const chats = pgTable('chats', {
+  id: serial("id").primaryKey(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  userId: integer("user_id").references(() => users.id).notNull(), 
+});
