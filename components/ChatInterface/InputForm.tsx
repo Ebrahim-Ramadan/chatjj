@@ -1,4 +1,4 @@
-import { FormEvent } from "react";
+import { FormEvent, memo } from "react";
 
 interface InputFormProps {
   input: string;
@@ -7,13 +7,16 @@ interface InputFormProps {
   handleSubmit: (e: FormEvent) => void;
 }
 
-const InputForm = ({ input, isLoading, setInput, handleSubmit }: InputFormProps) => {
+const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormProps) => {
   return (
-    <form onSubmit={handleSubmit} className="sticky bottom-0 p-2">
-      <div className="flex items-center gap-2 w-full max-w-xl mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="sticky bottom-0 p-2 bg-neutral-800 border-2 border-neutral-600 rounded-xl shadow-xl"
+    >
+      <div className="flex items-center gap-2 w-full">
         <input
           autoFocus
-          className="flex-1 p-4 border-2 border-neutral-600 rounded shadow-xl w-full text-white bg-neutral-800"
+          className="flex-1 p-2 border-none outline-none w-full text-white bg-transparent"
           value={input}
           placeholder={isLoading ? "Sending..." : "Type your message..."}
           onChange={(e) => setInput(e.target.value)}
@@ -22,7 +25,7 @@ const InputForm = ({ input, isLoading, setInput, handleSubmit }: InputFormProps)
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="p-4 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="p-4 disabled:text-gray-400 disabled:cursor-not-allowed"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -42,6 +45,7 @@ const InputForm = ({ input, isLoading, setInput, handleSubmit }: InputFormProps)
       </div>
     </form>
   );
-};
+});
 
+InputForm.displayName = "InputForm";
 export default InputForm;

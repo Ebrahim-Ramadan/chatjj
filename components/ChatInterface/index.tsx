@@ -148,14 +148,14 @@ export default function ChatInterface() {
   );
 
   return (
-    <div className="p-4 sm:ml-64 relative h-screen flex flex-col w-full">
+    <div className="p-4 sm:ml-96 relative h-screen flex flex-col ">
       {error && (
         <div className="p-4 mb-4 text-red-500 bg-red-100 rounded">{error}</div>
       )}
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {dbMessages.length === 0 ? (
-          <div className="p-4 text-gray-500">No messages found.</div>
+          <div className="p-4 text-gray-500 flex justify-center">Hi.</div>
         ) : (
           dbMessages.map((m: ChatMessage, index: number) => (
             <Suspense key={m.id || index} fallback={<div>Loading...</div>}>

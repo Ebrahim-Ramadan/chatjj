@@ -7,9 +7,9 @@ export default function ChatLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex">
-      {/* <SideBar /> */}
+    <div className="flex flex-col h-screen w-full">
       {children}
+      {/* <SideBar /> */}
     </div>
   );
 }
