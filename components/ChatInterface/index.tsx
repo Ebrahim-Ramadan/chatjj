@@ -12,21 +12,27 @@ import { useUser } from "@clerk/nextjs";
 
 export default function ChatInterface() {
   const { chatID } = useParams();
+  console.log('chatID', typeof chatID);
+  
   const router = useRouter();
   const { user } = useUser();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dbMessages, setDbMessages] = useState<ChatMessage[]>([]); 
-  const [newChatId, setNewChatId] = useState<string | null>(null);
+  const [dbMessages, setDbMessages] = useState<ChatMessage[]>([]);
 
   // Fetch messages when chatID changes
   useEffect(() => {
-    if (!chatID) return;
+    if (!chatID) {
+      console.log('none');
+      
+      return};
 
     const fetchMessages = async () => {
       try {
         const messages = await db.getMessagesForChat(chatID);
+        console.log('messages', messages);
+        
         setDbMessages(messages);
       } catch (err) {
         console.error("Error fetching messages:", err);
@@ -47,11 +53,14 @@ export default function ChatInterface() {
       setError(null);
 
       try {
+        // Generate a temporary local ID if no chatID exists
+        const tempChatId = chatID || generateUUID();
+        
         const userMessage: ChatMessage = {
           role: "user",
           content: input.trim(),
           timestamp: new Date(),
-          chatId: chatID || newChatId,
+          chatId: tempChatId,
         };
 
         // Add user message to Dexie and update local state
@@ -73,7 +82,7 @@ export default function ChatInterface() {
           role: "assistant",
           content: "",
           timestamp: new Date(),
-          chatId: chatID || newChatId,
+          chatId: tempChatId,
         };
         
         // Add initial assistant message and update local state
@@ -102,14 +111,31 @@ export default function ChatInterface() {
           );
         }
 
-        // Save chat to NeonDB if it's a new chat
+        // If this is a new chat, create it in NeonDB and update all messages with the new chatId
         if (user && !chatID) {
-          await createChat(user.id, input.trim());
-        }
+          const newNeonChatId = await createChat(user.id, input.trim());
 
-        // Redirect for new chats
-        if (!chatID && newChatId) {
-          router.push(`/${newChatId}`);
+          console.log('newNeonChatId.id', newNeonChatId.id);
+          
+          // Update all messages in Dexie with the new chatId
+          const messagesToUpdate = await db.chatMessages.where('chatId').equals(tempChatId).toArray();
+          
+          await Promise.all(messagesToUpdate.map(msg =>
+            db.chatMessages.update(msg.id!, {
+              chatId: newNeonChatId.id
+            })
+          ));
+
+          // Update local state with new chatId
+          setDbMessages(prev => 
+            prev.map(msg => ({
+              ...msg,
+              chatId: newNeonChatId.id
+            }))
+          );
+
+          // Redirect to the new chat URL
+          // router.push(`/${newNeonChatId}`);
         }
       } catch (error) {
         console.error("Error:", error);
@@ -118,11 +144,11 @@ export default function ChatInterface() {
         setIsLoading(false);
       }
     },
-    [input, isLoading, chatID, newChatId, user, router]
+    [input, isLoading, chatID, user, router]
   );
 
   return (
-    <div className="p-4 sm:ml-64 relative h-screen flex flex-col">
+    <div className="p-4 sm:ml-64 relative h-screen flex flex-col w-full">
       {error && (
         <div className="p-4 mb-4 text-red-500 bg-red-100 rounded">{error}</div>
       )}

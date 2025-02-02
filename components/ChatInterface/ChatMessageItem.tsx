@@ -5,7 +5,7 @@ const ChatMessageItem = memo(({ message }: { message: ChatMessage }) => {
   return (
     <div
       className={`p-4 rounded ${
-        message.role === "user" ? "bg-blue-100" : "bg-gray-100"
+        message.role === "user" ? "bg-neutral-900" : "bg-neutral-800"
       }`}
     >
       <div className="font-bold">
