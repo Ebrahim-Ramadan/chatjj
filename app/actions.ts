@@ -37,8 +37,9 @@ export const getUserChats = async (userId: string) => {
      .select({ id: users.id })
      .from(users)
      .where(eq(users.id, userId));
-
-   if (!userExists.length) {
+    console.log('userExists', userExists)
+    
+   if (userExists.length === 0) {
      return null;
    }
    
