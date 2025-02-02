@@ -9,17 +9,12 @@ import {
 
 // Users Table
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(), // Auto-incrementing primary key
-  name: varchar("name", { length: 255 }).notNull(), // User's full name
-  email: varchar("email", { length: 255 }).notNull().unique(), // Unique email address
-  password: varchar("password", { length: 255 }).notNull(), // Hashed password
-  createdAt: timestamp("created_at").defaultNow().notNull(), // Timestamp when the user was created
-  updatedAt: timestamp("updated_at").defaultNow().notNull(), // Timestamp when the user was last updated
+  id: varchar("id").primaryKey(), // Auto-incrementing primary key
 });
 
 export const chats = pgTable('chats', {
   id: serial("id").primaryKey(),
   name: text('name').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
-  userId: integer("user_id").references(() => users.id).notNull(), 
+  userId: varchar("user_id").references(() => users.id).notNull(), 
 });
