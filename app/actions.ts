@@ -125,7 +125,7 @@ export const updateChatName = async (chatId: number, userId: string, newName: st
 };
 
 // Get a single chat by ID
-export const getChatById = async (chatId: number, userId: string) => {
+export const getChatById = async (chatId: any, userId: any) => {
   try {
     if (!userId) {
       return null;
@@ -138,7 +138,8 @@ export const getChatById = async (chatId: number, userId: string) => {
         eq(chats.id, chatId) && 
         eq(chats.userId, userId)
       );
-
+    console.log('chat', chat)
+        
     return chat[0];
   } catch (error) {
     console.error("Error fetching chat:", error);

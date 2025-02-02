@@ -1,11 +1,21 @@
-export default function HomePage(props: { children: React.ReactNode, params: { chatID: string } }) {
-   console.log('chatID', props.params.chatID)
-   
+import ChatInterface from "@/components/NewChat";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
+import { getChatById } from "../actions";
+
+export default async function  HomePage(props: { children: React.ReactNode, params: { chatID: string } }) {
+   const session = await auth();
+   console.log('signed in, top level session', session)
+
+   if (!session.userId) {
+     return redirect("/sign-in");
+   }
+   const chat = await getChatById(props.params.chatID, session.userId);
+   if (!chat) {
+     return redirect(`/`);
+   }
     return (
-        <div className="p-4 sm:ml-64">
-        <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-           ass
-        </div>
-     </div>
+      <ChatInterface />
     );
   }

@@ -1,86 +1,71 @@
-import Dexie, { Table } from 'dexie';
+import Dexie, { type Table } from "dexie"
 
-// Define interfaces for our data types
-export interface Message {
-  id?: number;
-  chatId: number;
-  content: string;
-  role: 'user' | 'bot';
-  timestamp: Date;
+export interface ChatMessage {
+  id?: number
+  role: "user" | "assistant"
+  content: string
+  timestamp: Date
+  chatId: number
 }
 
-export interface Chat {
-  id?: number;
-  name: string;
-  createdAt: Date;
-}
-
-// Define the database
-class ChatDatabase extends Dexie {
-  chats!: Table<Chat, number>;
-  messages!: Table<Message, number>;
+export class MyDatabase extends Dexie {
+  chatMessages!: Table<ChatMessage>
 
   constructor() {
-    super('ChatDatabase');
-    
+    super("chatMessages")
     this.version(1).stores({
-      chats: '++id, name, createdAt',
-      messages: '++id, chatId, role, timestamp'
-    });
+      chatMessages: "++id, role, chatId, timestamp",
+    })
+  }
+
+  // Delete a single message by its ID
+  async deleteMessage(messageId: number) {
+    await this.chatMessages.delete(messageId)
+  }
+
+  // Delete all messages in a specific chat
+  async deleteAllMessagesInChat(chatId: number) {
+    await this.chatMessages.where('chatId').equals(chatId).delete()
+  }
+
+  // Delete multiple messages by their IDs
+  async deleteMultipleMessages(messageIds: number[]) {
+    await this.chatMessages.bulkDelete(messageIds)
+  }
+
+  // Get all messages for a specific chat
+  async getMessagesForChat(chatId: number) {
+    return await this.chatMessages.where('chatId').equals(chatId).toArray()
+  }
+
+  // Update a message's content
+  async updateMessageContent(messageId: number, newContent: string) {
+    await this.chatMessages.update(messageId, { content: newContent })
+  }
+
+  // Get the latest message in a chat
+  async getLatestMessageInChat(chatId: number) {
+    return await this.chatMessages
+      .where('chatId')
+      .equals(chatId)
+      .reverse()
+      .first()
+  }
+
+  // Get chats with their latest messages
+  async getChatsWithLatestMessages() {
+    const allMessages = await this.chatMessages.toArray()
+    const chatMap = new Map<number, ChatMessage>()
+
+    allMessages.forEach(message => {
+      const existingMessage = chatMap.get(message.chatId)
+      if (!existingMessage || message.timestamp > existingMessage.timestamp) {
+        chatMap.set(message.chatId, message)
+      }
+    })
+
+    return Array.from(chatMap.values())
   }
 }
 
-// Create database instance
-export const db = new ChatDatabase();
-
-// Database operations
-export const dbOperations = {
-  // Chat operations
-  createChat: async (name: string): Promise<number> => {
-    return await db.chats.add({
-      name,
-      createdAt: new Date()
-    });
-  },
-
-  getAllChats: async (): Promise<Chat[]> => {
-    return await db.chats.orderBy('createdAt').reverse().toArray();
-  },
-
-  deleteChat: async (chatId: number): Promise<void> => {
-    await db.transaction('rw', [db.chats, db.messages], async () => {
-      await db.messages.where('chatId').equals(chatId).delete();
-      await db.chats.delete(chatId);
-    });
-  },
-
-  // Message operations
-  addMessage: async (chatId: number, content: string, role: 'user' | 'bot'): Promise<number> => {
-    return await db.messages.add({
-      chatId,
-      content,
-      role,
-      timestamp: new Date()
-    });
-  },
-
-  getChatMessages: async (chatId: number): Promise<Message[]> => {
-    return await db.messages
-      .where('chatId')
-      .equals(chatId)
-      // .orderBy('timestamp')
-      .toArray();
-  },
-
-  deleteMessage: async (messageId: number): Promise<void> => {
-    await db.messages.delete(messageId);
-  },
-
-  // Clear all data
-  clearDatabase: async (): Promise<void> => {
-    await db.transaction('rw', [db.chats, db.messages], async () => {
-      await db.messages.clear();
-      await db.chats.clear();
-    });
-  }
-};
+export const db = new MyDatabase()
