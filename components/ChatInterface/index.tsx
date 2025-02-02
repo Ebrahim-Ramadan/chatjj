@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, FormEvent, Suspense } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db, type ChatMessage } from "@/lib/dexie";
 import { streamChat } from "@/utils/streamChatting";
 import { generateUUID } from "@/utils/generateUUID";
@@ -11,98 +10,107 @@ import InputForm from "./InputForm";
 import { createChat } from "@/app/actions";
 import { useUser } from "@clerk/nextjs";
 
-
 export default function ChatInterface() {
   const { chatID } = useParams();
   const router = useRouter();
-  const chatId = chatID ? parseInt(chatID as string, 10) : null;
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user } = useUser();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const currentChatId = chatId ? chatId : generateUUID();
+  const [dbMessages, setDbMessages] = useState<ChatMessage[]>([]); 
+  const [newChatId, setNewChatId] = useState<string | null>(null);
 
+  // Fetch messages when chatID changes
   useEffect(() => {
-    if (!chatID) {
-      router.push(`/${currentChatId}`);
-    }
-  }, [chatID, currentChatId, router]);
+    if (!chatID) return;
 
-  const dbMessages = useLiveQuery(
-    async () => {
-      // if (chatId === null) return [];
+    const fetchMessages = async () => {
       try {
-        return await db.chatMessages.where("chatId").equals(currentChatId).toArray();
+        const messages = await db.getMessagesForChat(chatID);
+        setDbMessages(messages);
       } catch (err) {
         console.error("Error fetching messages:", err);
         setError("Failed to load messages");
-        return [];
       }
-    },
-    [chatId],
-    []
-  );
-  console.log('dbMessages', dbMessages)
-  
+    };
 
+    fetchMessages();
+  }, [chatID]);
+
+  // Handle form submission
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
       if (!input.trim() || isLoading) return;
-  
+
       setIsLoading(true);
       setError(null);
-  
+
       try {
         const userMessage: ChatMessage = {
           role: "user",
           content: input.trim(),
           timestamp: new Date(),
-          chatId: currentChatId,
+          chatId: chatID || newChatId,
         };
-  
-        await db.chatMessages.add(userMessage);
+
+        // Add user message to Dexie and update local state
+        const userMessageId = await db.chatMessages.add(userMessage);
+        setDbMessages(prev => [...prev, { ...userMessage, id: userMessageId }]);
         setInput("");
-  
+
         const stream = await streamChat(input);
-        console.log('stream', stream);
-        
         if (!stream) {
           throw new Error("Failed to get response stream");
         }
-        
+
         const reader = stream.getReader();
         const decoder = new TextDecoder();
         let accumulatedResponse = "";
-  
-          // Create a temporary assistant message in the local database
+
+        // Create a temporary assistant message
         const assistantMessage: ChatMessage = {
           role: "assistant",
-          content: "", // Start with empty content
+          content: "",
           timestamp: new Date(),
-          chatId: currentChatId,
+          chatId: chatID || newChatId,
         };
-        const messageId = await db.chatMessages.add(assistantMessage);
-
-        // Stream the response in real-time
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Decode the chunk and append it to the accumulated response
-        const chunk = decoder.decode(value, { stream: true });
-        accumulatedResponse += chunk;
-      }
-      // Update the assistant's message in the local database when done
-      await db.chatMessages.update(messageId, {
-        content: accumulatedResponse,
-      });
-      // After the stream is complete, save the chat to Neon
-      if (!chatId) {
-        const { user } = useUser()
-        // await createChat(user.id, input.trim()); // Use the first message as the chat name
-      }
         
+        // Add initial assistant message and update local state
+        const messageId = await db.chatMessages.add(assistantMessage);
+        setDbMessages(prev => [...prev, { ...assistantMessage, id: messageId }]);
+
+        // Stream the response
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedResponse += chunk;
+          
+          // Update both Dexie and local state with the accumulated response
+          await db.chatMessages.update(messageId, {
+            content: accumulatedResponse,
+          });
+          
+          setDbMessages(prev => 
+            prev.map(msg => 
+              msg.id === messageId 
+                ? { ...msg, content: accumulatedResponse }
+                : msg
+            )
+          );
+        }
+
+        // Save chat to NeonDB if it's a new chat
+        if (user && !chatID) {
+          await createChat(user.id, input.trim());
+        }
+
+        // Redirect for new chats
+        if (!chatID && newChatId) {
+          router.push(`/${newChatId}`);
+        }
       } catch (error) {
         console.error("Error:", error);
         setError("Failed to send message. Please try again.");
@@ -110,7 +118,7 @@ export default function ChatInterface() {
         setIsLoading(false);
       }
     },
-    [input, isLoading, chatId]
+    [input, isLoading, chatID, newChatId, user, router]
   );
 
   return (
@@ -119,20 +127,18 @@ export default function ChatInterface() {
         <div className="p-4 mb-4 text-red-500 bg-red-100 rounded">{error}</div>
       )}
 
-      {/* Chat Messages Container */}
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {dbMessages === undefined ? (
-          <div className="p-4 text-gray-500">Loading messages...</div>
+        {dbMessages.length === 0 ? (
+          <div className="p-4 text-gray-500">No messages found.</div>
         ) : (
           dbMessages.map((m: ChatMessage, index: number) => (
             <Suspense key={m.id || index} fallback={<div>Loading...</div>}>
-            <ChatMessageItem key={m.id || index} message={m} />
+              <ChatMessageItem key={m.id || index} message={m} />
             </Suspense>
           ))
         )}
       </div>
 
-      {/* Input Form with Send Button */}
       <InputForm
         input={input}
         isLoading={isLoading}

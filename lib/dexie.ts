@@ -34,7 +34,7 @@ export class MyDatabase extends Dexie {
   }
 
   // Get all messages for a specific chat
-  async getMessagesForChat(chatId: number) {
+  async getMessagesForChat(chatId: any) {
     return await this.chatMessages.where('chatId').equals(chatId).toArray()
   }
 

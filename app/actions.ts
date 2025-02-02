@@ -1,3 +1,4 @@
+'use server'
 import { users, chats } from "../lib/schema";
 import { db } from "@/lib/drizzle";
 import { eq, desc } from "drizzle-orm";

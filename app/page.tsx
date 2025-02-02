@@ -39,7 +39,7 @@ console.log('signed in, top level session', session)
   }
   return (
     <Suspense fallback={<div>Loading...</div>}>
-    <SideBar userChats={userChats}/>
+    {/* <SideBar userChats={userChats}/> */}
 <ChatInterface />
     </Suspense>
   )
