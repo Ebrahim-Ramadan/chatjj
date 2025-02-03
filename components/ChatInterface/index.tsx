@@ -114,7 +114,7 @@ export default function ChatInterface() {
 
         // If this is a new chat, create it in NeonDB and update all messages with the new chatId
         if (user && !chatID) {
-          const newNeonChatId = await createChat(user.id, input.trim());
+          const newNeonChatId = await createChat(user.id, accumulatedResponse);
 
           console.log('newNeonChatId.id', newNeonChatId.id);
           

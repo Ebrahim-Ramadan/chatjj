@@ -3,6 +3,8 @@
 import { users, chats } from "../lib/schema";
 import { db } from "@/lib/drizzle";
 import { eq, desc, and  } from "drizzle-orm";
+import { generateChatName } from "@/utils/generateChatName";
+import { revalidatePath } from "next/cache";
 
 
 export const onboardUser = async (userId: string) => {
@@ -59,12 +61,13 @@ export const getUserChats = async (userId: string) => {
 };
 
 // Create a new chat
-export const createChat = async (userId: any, chatName: string) => {
+export const createChat = async (userId: any, accumulatedResponse: string) => {
   try {
     
     if (!userId) {
       return null;
     }
+    const chatName = await generateChatName({chat:accumulatedResponse})
     const newChat = await db
       .insert(chats)
       .values({
@@ -105,7 +108,7 @@ export const deleteChatsSequentially = async (
 
     // Log deletion for monitoring
     console.info(`Chat ${chatId} deleted for user ${userId}`);
-    
+    revalidatePath('/')
     return deletedChat;
   } catch (error) {
     // Error handling

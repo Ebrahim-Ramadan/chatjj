@@ -29,8 +29,8 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({ userChat
     // onDeleteChats(checkedChats);
     console.log("checked", checkedChats)
     for (const chatId of checkedChats) {
-      const deleted = await deleteChatsSequentially(chatId, userID)
       const deletedChats = await db.deleteAllMessagesInChat(chatId);
+      const deleted = await deleteChatsSequentially(chatId, userID)
       toast.success('Deleted');
       console.log('deleted', deleted)
       console.log('deletedChats', deletedChats)
