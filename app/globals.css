@@ -13,7 +13,9 @@
     --foreground: #ededed;
   }
 }
-
+html {
+  scroll-behavior: smooth;
+}
 body {
   color: var(--foreground);
   background: var(--background);
@@ -28,4 +30,161 @@ body {
 
 :root {
   scroll-padding: 0;
+}
+/* width */
+::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  height: 0;
+  border-radius: 0;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  height: 0;
+  border-radius: 0;
+}
+
+
+
+/* JavaScript */
+.language-javascript {
+  border-color: #f1e05a;
+}
+
+/* Python */
+.language-python {
+  border-color: #3572A5;
+}
+
+/* Java */
+.language-java {
+  border-color: #b07219;
+}
+
+/* C */
+.language-c {
+  border-color: #555555;
+}
+
+/* C++ */
+.language-cpp {
+  border-color: #f34b7d;
+}
+
+/* C# */
+.language-csharp {
+  border-color: #178600;
+}
+
+/* PHP */
+.language-php {
+  border-color: #4F5D95;
+}
+
+/* Ruby */
+.language-ruby {
+  border-color: #701516;
+}
+
+/* Swift */
+.language-swift {
+  border-color: #ffac45;
+}
+
+/* TypeScript */
+.language-typescript {
+  border-color: #3178c6;
+}
+/* jsx */
+.language-jsx {
+  border-color: #3178c6;
+}
+/* tsx */
+.language-tsx {
+  border-color: #3178c6;
+}
+
+/* Go */
+.language-go {
+  border-color: #00ADD8;
+}
+
+/* Rust */
+.language-rust {
+  border-color: #dea584;
+}
+
+/* Kotlin */
+.language-kotlin {
+  border-color: #F18E33;
+}
+
+/* Dart */
+.language-dart {
+  border-color: #00B4AB;
+}
+
+/* HTML */
+.language-html {
+  border-color: #e34c26;
+}
+
+/* CSS */
+.language-css {
+  border-color: #563d7c;
+}
+
+/* Shell */
+.language-shell {
+  border-color: #89e051;
+}
+
+/* SQL */
+.language-sql {
+  border-color: #e38c00;
+}
+
+/* R */
+.language-r {
+  border-color: #198ce7;
+}
+
+/* Lua */
+.language-lua {
+  border-color: #000080;
+}
+
+/* Perl */
+.language-perl {
+  border-color: #0298c3;
+}
+
+/* Objective-C */
+.language-objectivec {
+  border-color: #438eff;
+}
+
+/* SCSS */
+.language-scss {
+  border-color: #c6538c;
+}
+
+/* YAML */
+.language-yaml {
+  border-color: #cb171e;
+}
+
+/* JSON */
+.language-json {
+  border-color: #cb171e;
+}
+
+/* Markdown */
+.language-markdown {
+  border-color: #083fa1;
 }

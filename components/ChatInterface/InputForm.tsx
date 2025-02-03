@@ -1,4 +1,5 @@
 import { FormEvent, memo } from "react";
+import LoadingDots from "../LoadingComponent";
 
 interface InputFormProps {
   input: string;
@@ -18,14 +19,17 @@ const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormP
           autoFocus
           className="flex-1 p-2 border-none outline-none w-full text-white bg-transparent"
           value={input}
-          placeholder={isLoading ? "Sending..." : "Type your message..."}
+          placeholder="Type your message..."
           onChange={(e) => setInput(e.target.value)}
-          disabled={isLoading}
+          // disabled={isLoading}
         />
-        <button
+        {isLoading?
+      <LoadingDots/>
+      :
+<button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="p-4 disabled:text-gray-400 disabled:cursor-not-allowed"
+          className="p-2 disabled:text-gray-400 disabled:cursor-not-allowed"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -42,6 +46,8 @@ const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormP
             />
           </svg>
         </button>
+      }
+        
       </div>
     </form>
   );
