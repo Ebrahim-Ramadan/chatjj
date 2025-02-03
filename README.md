@@ -16,11 +16,7 @@ after downloading the deepseek model, you just run
 now go ahead and try the app to talk to your model <b>locally</b>.
 
 #### Cloning (dev)
-follow the steps in the [live section](https://github.com/Ebrahim-Ramadan/chatjj?tab=readme-ov-file#live) above, then clone this repo, and run 
-`bun install`
- and 
-`bun run dev`
-and do not forget to add the `.env` file at the root, containing
+follow the steps in the [live section](https://github.com/Ebrahim-Ramadan/chatjj?tab=readme-ov-file#live) above, then clone this repo, and do not forget to add the `.env` file at the root, containing
 ```
 DATABASE_URL='postgresql://neondb_owner:<your connection string>neondb?sslmode=require'
 
@@ -33,6 +29,12 @@ NEXT_PUBLIC_GOOGLE_CLIENT_SECRET = ""
 NEXT_PUBLIC_GOOGLE_REDIRECT_URI = "http://localhost:3000/api/GoogleCallBack"
 ```
 
+then run 
+`bun install`
+ and 
+`bun run dev`
+
+now you will see something like `[PWA] PWA support is disabled` because PWA is not supported in development, I made it that way through `next.config.mjs` [here](https://github.com/Ebrahim-Ramadan/chatjj/blob/main/next.config.mjs) with `next-pwa` package, but you can remove it if you want. (this is the recommended way by the masters)
 
 <br/>
 <br/>
