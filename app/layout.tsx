@@ -1,5 +1,5 @@
 // api/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Toaster } from 'sonner'
 import React from 'react'
@@ -20,10 +20,12 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-
+export const viewport: Viewport = {
+  themeColor: '#18181B', // This should match the theme_color in your manifest
+};
 export const metadata: Metadata = {
   manifest: '/web.manifest', // Link to the manifest file
-  themeColor: '#18181B', // This should match the theme_color in your manifest
+  // themeColor: '#18181B', // This should match the theme_color in your manifest
   description: "talk to your local AI",
   icons: {
     icon: "/favicon.ico",
