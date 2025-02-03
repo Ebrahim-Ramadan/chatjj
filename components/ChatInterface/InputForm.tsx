@@ -9,21 +9,21 @@ interface InputFormProps {
 }
 
 const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormProps) => {
-  // Handle keydown events in the textarea
+  
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      // Prevent default behavior (new line) if Shift is not pressed
+      // shift + enter => new line (not submit)
       e.preventDefault();
-      handleSubmit(e); // Submit the form
+      handleSubmit(e); 
     }
-    // If Shift + Enter is pressed, allow the textarea to create a new line
+    
   };
 
-  // Adjust textarea height dynamically
+  
   const adjustTextareaHeight = (e: React.ChangeEvent<HTMLTextAreaElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
-    textarea.style.height = "auto"; // Reset height
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 240)}px`; // Set new height (max 10rem = 160px)
+    textarea.style.height = "auto"; 
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 240)}px`; 
   };
 
   return (
@@ -34,22 +34,22 @@ const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormP
       <div className="flex p-2 items-center gap-4 w-full">
         <textarea
           autoFocus
-          rows={1} // Start with 1 row
+          rows={1} 
           style={{
-            maxHeight: "15rem", // Maximum height (10rem = 160px)
-            resize: "none", // Disable manual resizing
-            overflowY: "auto",  // Hide scrollbar
+            maxHeight: "15rem", 
+            resize: "none", 
+            overflowY: "auto",  
           }}
           className="resize-none text-[rgb(var(--ds-rgb-label-1))] caret-[rgb(var(--ds-rgb-label-1))] bg-transparent border-none outline-none w-full text-white"
           value={input}
           placeholder="Type your message..."
           onChange={(e) => {
             setInput(e.target.value);
-            adjustTextareaHeight(e); // Adjust height on change
+            adjustTextareaHeight(e); 
           }}
           onKeyDown={(e) => {
-            handleKeyDown(e); // Handle keydown events
-            adjustTextareaHeight(e); // Adjust height on keydown (for Shift + Enter)
+            handleKeyDown(e); 
+            adjustTextareaHeight(e); 
           }}
         />
         {isLoading ? (

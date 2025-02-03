@@ -9,9 +9,9 @@ import ChatMessageItem from "./ChatMessageItem";
 import InputForm from "./InputForm";
 
 export default function ChatInterface() {
-  const { chatID } = useParams();
+  let { chatID } = useParams();
   console.log('chatID', typeof chatID);
-  
+  chatID = parseInt(chatID, 10)
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
