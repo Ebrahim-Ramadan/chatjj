@@ -9,14 +9,23 @@ import { cookies } from "next/headers";
 
 
 export const checkAuthentication = async () => {
-  const cookieStore = cookies();
-  const userId = cookieStore.get('userID')?.value;
-console.log('userId', userId)
+  try {
+    const cookieStore = await cookies();
+    console.log("All cookies:", cookies().getAll());
 
-  if (!userId) {
-    return false;
+    const userId = cookieStore.get("userID")?.value;
+
+    console.log("checkAuthentication userID:", userId);
+
+    if (!userId) {
+      return null; // Explicitly return null instead of false
+    }
+
+    return userId;
+  } catch (error) {
+    console.error("Error checking authentication:", error);
+    return null; // Fallback in case of an error
   }
-  return userId;
 };
 export const getUser = async () => {
   const cookieStore = cookies();
@@ -42,9 +51,10 @@ export const getUser = async () => {
 export async function createUserSession(userId: string ) {
   const cookieStore = cookies();
   cookieStore.set('userID', userId, {
+    httpOnly: true,  // Prevents JavaScript access
+    secure: process.env.NODE_ENV === "production", // Secure in production
     maxAge:60 * 60 * 24 * 30 , 
     path: '/',
-    httpOnly: true,
   });
   return true;
 }

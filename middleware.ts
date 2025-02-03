@@ -1,21 +1,29 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { checkAuthentication } from './app/actions'
+import { NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  // Check if user is authenticated
-  // const isAuthenticated = await checkAuthentication()
+export function middleware(req: NextRequest) {
+  const userID = req.cookies.get("userID")?.value;
 
-  // If not authenticated and trying to access root chat, redirect to signup
-  // if (!isAuthenticated && request.nextUrl.pathname === '/') {
-  //   return NextResponse.redirect(new URL('/sign-up', request.url))
-  // }
-
-  // Existing about page rewrite
-  if (request.nextUrl.pathname.startsWith('/about')) {
-    return NextResponse.rewrite(new URL('/about-2', request.url))
+  // Redirect if no userID and not on sign-in page
+  if (!userID && req.nextUrl.pathname !== "/sign-in") {
+    return NextResponse.redirect(new URL("/sign-in", req.url));
+  }
+  // redirect to home page if userID exists 
+  if (userID) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // For authenticated users or other routes, continue normally
-  return NextResponse.next()
+  // Clone the request and attach the userID to headers
+  const requestHeaders = new Headers(req.headers);
+  if (userID) {
+    requestHeaders.set("x-user-id", userID); // Attach userID to headers
+  }
+
+  const response = NextResponse.next();
+  response.headers.set("x-user-id", userID || ""); // Also attach it to response if needed
+
+  return response;
 }
+
+export const config = {
+  matcher: ["/dashboard/:path*", "/profile/:path*"], // Protect these routes
+};

@@ -7,6 +7,7 @@ import {  checkAuthentication, getUserChats } from "@/app/actions";
 import "./globals.css";
 import { DeleteChatsWrapper } from "@/components/DeleteChatsWraper";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -65,13 +66,17 @@ export default async function layout({
   children: React.ReactNode;
 }>) {
 
-const userID = await checkAuthentication();
-console.log('layout root userID', userID);
+  const userID = await checkAuthentication();
 
-if (!userID) {
-  return redirect("/sign-in");
-}
+  console.log("layout root userID:", userID);
+  
+  // if (userID === null) {
+  //   console.log("No valid user session found, redirecting...");
+  //   return redirect("/sign-in");
+  // }
 const userChats = await getUserChats(userID)
+console.log('userChats', userChats);
+
   return (
     <html lang="en">
       <head>
@@ -85,7 +90,7 @@ const userChats = await getUserChats(userID)
       >
           <Toaster position="top-center" richColors  theme="dark"/>
         {children}
-      <DeleteChatsWrapper userChats={userChats} userID={userID} />
+      <DeleteChatsWrapper userChats={userChats && userChats} userID={userID} />
 
       </body>
     </html>

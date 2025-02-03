@@ -22,7 +22,8 @@ export default function ChatInterface() {
   useEffect(() => {
     if (!chatID) {
       console.log('none');
-      return};
+      return;
+    }
 
     const fetchMessages = async () => {
       try {
@@ -59,7 +60,7 @@ export default function ChatInterface() {
           chatId: tempChatId,
         };
 
-        // Add user message to Dexie and update local state
+        // Optimistically add user message to Dexie and update local state
         const userMessageId = await db.chatMessages.add(userMessage);
         setDbMessages(prev => [...prev, { ...userMessage, id: userMessageId }]);
         setInput("");
@@ -69,6 +70,18 @@ export default function ChatInterface() {
           throw new Error("Failed to get response stream");
         }
 
+        // Start the createChat API call in parallel with the streaming
+        const chatCreationPromise = chatID
+          ? Promise.resolve(null) // No need to create chat if chatID exists
+          : fetch('/api/createChat', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ content: input.trim() }),
+            }).then(res => res.json());
+
+        // Stream the response and update Dexie as the message is received
         const reader = stream.getReader();
         const decoder = new TextDecoder();
         let accumulatedResponse = "";
@@ -81,7 +94,7 @@ export default function ChatInterface() {
           chatId: tempChatId,
         };
         
-        // Add initial assistant message and update local state
+        // Optimistically add assistant message to Dexie and update local state
         const messageId = await db.chatMessages.add(assistantMessage);
         setDbMessages(prev => [...prev, { ...assistantMessage, id: messageId }]);
 
@@ -93,57 +106,23 @@ export default function ChatInterface() {
           const chunk = decoder.decode(value, { stream: true });
           accumulatedResponse += chunk;
           
-          // Update both Dexie and local state with the accumulated response
-          await db.chatMessages.update(messageId, {
-            content: accumulatedResponse,
-          });
-          
-          setDbMessages(prev => 
-            prev.map(msg => 
-              msg.id === messageId 
-                ? { ...msg, content: accumulatedResponse }
-                : msg
-            )
-          );
+          // Update Dexie and local state with accumulated response
+          await db.chatMessages.update(messageId, { content: accumulatedResponse });
+          setDbMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, content: accumulatedResponse } : msg));
         }
-        setIsLoading(false);
 
-        // If this is a new chat, create it in NeonDB and update all messages with the new chatId
-        if (!chatID) {
-          // const newNeonChatId = await createChat(user.id, accumulatedResponse);
-          const newChat = await fetch('/api/createChat', 
-          {
-            next: { tags: ['CreateNewChat'] },
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              content: accumulatedResponse,
-            }),
-          })
-          const {id} = await newChat.json();
-          console.log('newNeonChatId', id);
-          // Redirect to the new chat URL
-          router.push(`/${id}`);
-          
-          // Update all messages in Dexie with the new chatId
+        // Wait for chat creation if needed
+        const { id: newChatId } = await chatCreationPromise;
+
+        if (newChatId) {
+          // Update all messages with the new chatId
           const messagesToUpdate = await db.chatMessages.where('chatId').equals(tempChatId).toArray();
-          
-          await Promise.all(messagesToUpdate.map(msg =>
-            db.chatMessages.update(msg.id!, {
-              chatId: id
-            })
-          ));
+          await Promise.all(messagesToUpdate.map(msg => db.chatMessages.update(msg.id!, { chatId: newChatId })));
 
           // Update local state with new chatId
-          setDbMessages(prev => 
-            prev.map(msg => ({
-              ...msg,
-              chatId: id
-            }))
-          );
-router.refresh()
+          setDbMessages(prev => prev.map(msg => ({ ...msg, chatId: newChatId })));
+          router.push(`/${newChatId}`);
+          router.refresh();
         }
       } catch (error) {
         console.error("Error:", error);
@@ -156,7 +135,7 @@ router.refresh()
   );
 
   return (
-    <div className="p-4  relative h-screen flex flex-col md:ml-64 lg:px-56 md:px-24">
+    <div className="p-4 relative h-screen flex flex-col md:ml-64 lg:px-56 md:px-24">
       {error && (
         <div className="p-4 mb-4 text-red-500 bg-red-100 rounded">{error}</div>
       )}

@@ -3,7 +3,8 @@
 import { db } from '@/lib/dexie'
 import { deleteChatsSequentially } from "@/app/actions"
 import type React from "react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import SideBar from "./SideBar"
 import { toast } from 'sonner';
 
@@ -25,7 +26,10 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
 }) => {
   
   const [checkedChats, setCheckedChats] = useState<number[]>([])
-  const [localChats, setLocalChats] = useState<CHAT[]>(userChats)
+  const [localChats, setLocalChats] = useState<CHAT[]>(userChats || [])
+  
+  const router = useRouter()
+  const pathname = usePathname()
 
   const handleCheckChat = useCallback((chatId: number) => {
     setCheckedChats((prev) =>
@@ -36,25 +40,28 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
   }, [])
 
   const handleDeleteChecked = useCallback(async () => {
-    // Optimistic update: Remove the checked chats from the local state
     const chatsToDelete = localChats.filter(chat => checkedChats.includes(chat.id))
     
     setLocalChats(prevChats => prevChats.filter(chat => !checkedChats.includes(chat.id)))
     setCheckedChats([])
 
     try {
-      // Perform the actual deletion
       for (const chatId of checkedChats) {
         await db.deleteAllMessagesInChat(chatId)
         await deleteChatsSequentially(chatId, userID)
+
+        // ✅ Redirect if the current chat is being deleted
+        if (pathname.includes(`/${chatId}`)) {
+          router.push("/") // Redirect to home or another safe page
+        }
       }
+
       toast.success('Chats deleted successfully')
     } catch (error) {
-      // Revert the local state if the deletion fails
       setLocalChats(prevChats => [...prevChats, ...chatsToDelete])
       toast.error('Failed to delete chats')
     }
-  }, [checkedChats, localChats, userID])
+  }, [checkedChats, localChats, userID, pathname, router])
 
   return (
     <>
@@ -64,9 +71,7 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
         onCheckChat={handleCheckChat}
       />
       <div
-        className={`fixed bottom-0 ${
-          checkedChats.length === 0 ? 'opacity-0' : "opacity-100"
-        } transition-all duration-300 left-0 w-64 p-4 bg-neutral-100 dark:bg-neutral-700 z-50`}
+        className={`fixed bottom-0 ${checkedChats.length === 0 ? 'opacity-0' : "opacity-100"} transition-all duration-300 left-0 w-64 p-4 bg-neutral-100 dark:bg-neutral-700 z-50`}
       >
         <button
           onClick={handleDeleteChecked}
