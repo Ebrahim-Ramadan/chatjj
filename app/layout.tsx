@@ -71,6 +71,7 @@ console.log('layout root userID', userID);
 if (!userID) {
   return redirect("/sign-in");
 }
+const userChats = await getUserChats(userID)
   return (
     <html lang="en">
       <head>
@@ -84,7 +85,7 @@ if (!userID) {
       >
           <Toaster position="top-center" richColors  theme="dark"/>
         {children}
-      {/* <DeleteChatsWrapper userChats={userChats} userID={user.id} /> */}
+      <DeleteChatsWrapper userChats={userChats} userID={userID} />
 
       </body>
     </html>

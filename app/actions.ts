@@ -85,7 +85,6 @@ export const onboardUser = async (userId: string) => {
 
 export const getUserChats = async (userId: string) => {
   try {
-    // Convert userId to number since it's defined as integer in schema
     
      // First check if user exists
      const userExists = await db
@@ -95,7 +94,7 @@ export const getUserChats = async (userId: string) => {
     console.log('userExists', userExists)
     
    if (userExists.length === 0) {
-     return null;
+     return false;
    }
    
     const userChats = await db
@@ -107,7 +106,7 @@ export const getUserChats = async (userId: string) => {
     return userChats;
   } catch (error) {
     console.error("Error fetching user chats:", error);
-    return null;
+    return false;
   }
 };
 
