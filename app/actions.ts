@@ -1,10 +1,72 @@
 'use server'
+'server only'
 
 import { users, chats } from "../lib/schema";
 import { db } from "@/lib/drizzle";
 import { eq, desc, and  } from "drizzle-orm";
 import { generateChatName } from "@/utils/generateChatName";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+
+
+
+export const getUserId = async()=> {
+  const cookieStore = cookies();
+  const userId = await cookieStore.get('userID')?.value;
+  return userId;
+}
+
+export async function createUserSession(userId: string ) {
+  const cookieStore = cookies();
+  cookieStore.set('userID', userId, {
+    maxAge:60 * 60 * 24 * 30 , 
+    path: '/',
+    httpOnly: true,
+  });
+  revalidatePath("/");
+  return true;
+}
+export const getUserById = async (userId: any | number) => {
+  console.log('id', userId);
+  
+  try {
+    // const userId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (!userId) {
+      console.error('Invalid user ID:', userId);
+      return null;
+    }
+    const data = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.id, userId));
+
+    return data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
+}
+
+export async function logout() {
+  const cookieStore = cookies();
+  cookieStore.delete('userID');
+  revalidatePath("/");
+  return true;
+}
+export const getUser = async () => {
+  const userId = await getUserId();
+  console.log("User ID:", userId); // Debugging
+
+  if (!userId) return null;
+
+  const user = await getUserById(userId);
+  console.log("User:", user); // Debugging
+
+  if (user) return user;
+
+  await logout();
+  return null;
+};
 
 
 export const onboardUser = async (userId: string) => {

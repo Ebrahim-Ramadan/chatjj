@@ -1,8 +1,7 @@
 // app/[chatID]/layout.tsx
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import React from 'react';
-import { getChatById } from "../actions";
+import { getChatById, getUser } from "../actions";
 import type { Metadata, ResolvingMetadata } from 'next'
 
 type Props = {
@@ -15,17 +14,13 @@ interface ChatLayoutProps {
 }
 
 export default async function ChatLayout({ children, params }: ChatLayoutProps) {
-  // Log the chatID
-  console.log('Chat ID ass:', params.chatID);
-  const session = await auth();
-  console.log('signed in, top level session', session);
+  const user = await getUser();
 
-  if (!session.userId) {
+  if (!user?.id) {
     return redirect("/sign-in");
   }
-    // Check if chatID exists in userChats
     console.log('params.chatID', params.chatID);
-    const chatExists = await getChatById(params.chatID, session?.userId);
+    const chatExists = await getChatById(params.chatID, user?.id);
     console.log('chatExists', chatExists);
     
     if (!chatExists) {

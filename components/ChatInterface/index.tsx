@@ -7,15 +7,12 @@ import { streamChat } from "@/utils/streamChatting";
 import { generateUUID } from "@/utils/generateUUID";
 import ChatMessageItem from "./ChatMessageItem";
 import InputForm from "./InputForm";
-import { createChat } from "@/app/actions";
-import { useUser } from "@clerk/nextjs";
 
 export default function ChatInterface() {
   const { chatID } = useParams();
   console.log('chatID', typeof chatID);
   
   const router = useRouter();
-  const { user } = useUser();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,11 +108,18 @@ export default function ChatInterface() {
         }
 
         // If this is a new chat, create it in NeonDB and update all messages with the new chatId
-        if (user && !chatID) {
-          const newNeonChatId = await createChat(user.id, accumulatedResponse);
-
+        if (!chatID) {
+          // const newNeonChatId = await createChat(user.id, accumulatedResponse);
+          const newNeonChatId = await fetch('/api/createChat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content: accumulatedResponse,
+            }),
+          })
           console.log('newNeonChatId.id', newNeonChatId.id);
-          
           // Update all messages in Dexie with the new chatId
           const messagesToUpdate = await db.chatMessages.where('chatId').equals(tempChatId).toArray();
           
