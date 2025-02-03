@@ -106,11 +106,14 @@ export default function ChatInterface() {
             )
           );
         }
+        setIsLoading(false);
 
         // If this is a new chat, create it in NeonDB and update all messages with the new chatId
         if (!chatID) {
           // const newNeonChatId = await createChat(user.id, accumulatedResponse);
-          const newChat = await fetch('/api/createChat', {
+          const newChat = await fetch('/api/createChat', 
+          {
+            next: { tags: ['CreateNewChat'] },
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -121,6 +124,9 @@ export default function ChatInterface() {
           })
           const {id} = await newChat.json();
           console.log('newNeonChatId', id);
+          // Redirect to the new chat URL
+          router.push(`/${id}`);
+          
           // Update all messages in Dexie with the new chatId
           const messagesToUpdate = await db.chatMessages.where('chatId').equals(tempChatId).toArray();
           
@@ -137,9 +143,7 @@ export default function ChatInterface() {
               chatId: id
             }))
           );
-// revalidatePath('/')
-          // Redirect to the new chat URL
-          router.push(`/${id}`);
+router.refresh()
         }
       } catch (error) {
         console.error("Error:", error);

@@ -23,6 +23,7 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
   userChats,
   userID,
 }) => {
+  
   const [checkedChats, setCheckedChats] = useState<number[]>([])
   const [localChats, setLocalChats] = useState<CHAT[]>(userChats)
 
@@ -37,6 +38,7 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
   const handleDeleteChecked = useCallback(async () => {
     // Optimistic update: Remove the checked chats from the local state
     const chatsToDelete = localChats.filter(chat => checkedChats.includes(chat.id))
+    
     setLocalChats(prevChats => prevChats.filter(chat => !checkedChats.includes(chat.id)))
     setCheckedChats([])
 
@@ -46,7 +48,7 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
         await db.deleteAllMessagesInChat(chatId)
         await deleteChatsSequentially(chatId, userID)
       }
-      toast.success('Chat deleted')
+      toast.success('Chats deleted successfully')
     } catch (error) {
       // Revert the local state if the deletion fails
       setLocalChats(prevChats => [...prevChats, ...chatsToDelete])

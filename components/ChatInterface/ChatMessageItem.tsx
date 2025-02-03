@@ -1,16 +1,16 @@
 import { memo } from "react";
 import { toast } from "sonner";
 
-const ChatMessageItem = memo(({ message }) => {
+const ChatMessageItem = memo(({ message : message }: any) => {
   console.log('message', message.content);
   
   const isUser = message.role === "user";
 
-  const renderTextWithBold = (text) => {
+  const renderTextWithBold = (text:any) => {
     // Split the text into segments based on headers, bold text, and numbered lists
     const segments = text.split(/(###\s+|\*\*.+?\*\*|\d+\.\s+)/g).filter(Boolean);
     
-    return segments.map((segment, index) => {
+    return segments.map((segment:any, index:any) => {
       // Skip empty segments or segments with only a period
       if (segment.trim().length < 1 || segment.trim() === " " || segment.charAt(segment.length - 1) === '.') return null;
 
@@ -52,7 +52,7 @@ const ChatMessageItem = memo(({ message }) => {
     });
   };
 
-  const renderCode = (codeContent, language) => (
+  const renderCode = (codeContent:any, language:any) => (
     <div className="relative">
       <pre className={`bg-neutral-800 px-4 py-6 rounded-b-lg my-2 overflow-x-auto relative border-t-2 border-b-0 border-r-0 border-l-0 ${
         language && `language-${language}`
@@ -76,12 +76,12 @@ const ChatMessageItem = memo(({ message }) => {
     </div>
   );
 
-  const renderContent = (text) => {
+  const renderContent = (text:any) => {
     if (isUser) return text;
 
     const parts = text.split(/(```[\s\S]*?```)/g);
     
-    return parts.map((part, index) => {
+    return parts.map((part:any) => {
       if (part.startsWith("```")) {
         const codeBlock = part.slice(3, -3);
         const [language, ...codeLines] = codeBlock.trim().split("\n");
@@ -92,7 +92,7 @@ const ChatMessageItem = memo(({ message }) => {
     });
   };
 
-  const renderThinkContent = (text) => {
+  const renderThinkContent = (text:any) => {
     if (text.trim().length === 0 || text.trim() === " ") return null;
     return (
       <div className="bg-neutral-900 p-3 border-t-2 border-b-2 border-r-0 border-l-0 border-neutral-800 italic text-neutral-300">
@@ -109,7 +109,7 @@ const ChatMessageItem = memo(({ message }) => {
         } ${isUser ? "rounded-br-none" : "rounded-bl-none"}`}
       >
         <div className="space-y-2">
-          {message.content.split(/<think>|<\/think>/).map((part, index) => {
+          {message.content.split(/<think>|<\/think>/).map((part:any, index:any) => {
             if (!part.trim()) return null;
 
             if (index % 2 === 1) {

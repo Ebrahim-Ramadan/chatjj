@@ -2,7 +2,7 @@ import { generateChatName } from "@/utils/generateChatName";
 import { db } from "@/lib/drizzle";
 import {  chats } from "@/lib/schema";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getUser } from "@/app/actions";
 
 export async function POST(req: Request) {
@@ -23,6 +23,7 @@ const userId: any = await getUser();
           .returning();
           
           revalidatePath('/')
+          revalidateTag('CreateNewChat')
         return NextResponse.json(newChat[0]);
       } catch (error) {
         console.error("Error creating chat:", error);
