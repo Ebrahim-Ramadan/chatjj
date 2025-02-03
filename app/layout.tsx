@@ -39,7 +39,7 @@ export default async function RootLayout({
   const userChats = await getUserChats(session.userId);
   console.log('userChats', userChats);
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic>
     <html lang="en">
       <head>
       <script
