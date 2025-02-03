@@ -16,7 +16,7 @@ after downloading the deepseek model, you just run
 now go ahead and try the app to talk to your model <b>locally</b>.
 
 #### Cloning (dev)
-follow the steps in the live section above, then clone this repo, and run 
+follow the steps in the [live section](https://github.com/Ebrahim-Ramadan/chatjj?tab=readme-ov-file#live) above, then clone this repo, and run 
 `bun install`
  and 
 `bun run dev`
@@ -34,6 +34,18 @@ NEXT_PUBLIC_GOOGLE_REDIRECT_URI = "http://localhost:3000/api/GoogleCallBack"
 ```
 
 
+<br/>
+<br/>
+<br/>
+<br/>
+-------------------------------------------------------
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 <br/>
 
 (for me) things to do
