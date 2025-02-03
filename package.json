@@ -18,7 +18,8 @@
     "ollama": "^0.5.12",
     "react": "^18",
     "react-dom": "^18",
-    "sonner": "^1.7.4"
+    "sonner": "^1.7.4",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/node": "^20",

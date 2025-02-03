@@ -6,7 +6,7 @@ import { eq, desc, and  } from "drizzle-orm";
 import { generateChatName } from "@/utils/generateChatName";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-
+import webpush from 'web-push'
 
 export const checkAuthentication = async () => {
   try {
@@ -220,3 +220,26 @@ export const getChatById = async (chatId: any, userId: any) => {
     return null;
   }
 };
+
+
+
+
+
+
+export async function sendNotification(message: string) {
+ 
+  try {
+    await webpush.sendNotification(
+      // subscription,
+      JSON.stringify({
+        title: 'Test Notification',
+        body: message,
+        icon: '/favicon-96x96.png',
+      })
+    )
+    return { success: true }
+  } catch (error) {
+    console.error('Error sending push notification:', error)
+    return { success: false, error: 'Failed to send notification' }
+  }
+}
