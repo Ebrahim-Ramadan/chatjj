@@ -22,6 +22,8 @@ const geistMono = localFont({
 
 
 export const metadata: Metadata = {
+  manifest: '/manifest.webmanifest', // Link to the manifest file
+  themeColor: '#18181B', // This should match the theme_color in your manifest
   description: "talk to your local AI",
   icons: {
     icon: "/favicon.ico",

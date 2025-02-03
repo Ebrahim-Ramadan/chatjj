@@ -1,3 +1,4 @@
+import InstallButton from "./PWA/InstallButton"
 
 export default function UnlimitedMessages() {
   return (
@@ -56,6 +57,7 @@ export default function UnlimitedMessages() {
               </span>
             ))}
           </div>
+          <InstallButton/>
         </div>
       </div>
     </div>
