@@ -83,37 +83,20 @@ export const createChat = async (userId: any, chatName: string) => {
 };
 
 // delete multiple chats (non-http drivers do not support transactions)
-export const deleteChatsSequentially = async (chatIds: number[], userId: string) => {
-  if (!userId || chatIds.length === 0) {
+export const deleteChatsSequentially = async (chatId: any, userId: string) => {
+
+  if (!userId && !chatId) {
     return null;
   }
-
-  const deletedChats = [];
-
-  for (const chatId of chatIds) {
-    try {
-      const deletedChat = await db
+  const deletedChat = await db
         .delete(chats)
         .where(
           eq(chats.id, chatId) && 
           eq(chats.userId, userId)
         )
         .returning();
-        // Delete associated messages from Dexie
-      await dexieDb.deleteAllMessagesInChat(chatId);
-      if (deletedChat[0]) {
-        deletedChats.push(deletedChat[0]);
-      }
-      revalidatePath('/')
-      
-    } catch (error) {
-      console.error(`Error deleting chat ${chatId}:`, error);
-    }
-  }
-  console.log('deletedChats', deletedChats)
-  
 
-  return deletedChats;
+  return deletedChat;
 };
 
 // Update chat name

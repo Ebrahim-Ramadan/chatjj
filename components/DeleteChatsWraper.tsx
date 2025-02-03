@@ -1,5 +1,5 @@
 "use client"
-import { redirect } from "next/navigation";
+import{ db } from '@/lib/dexie'
 import { deleteChatsSequentially } from "@/app/actions"
 import type React from "react"
 import { useState, useCallback } from "react"
@@ -28,7 +28,13 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({ userChat
   const handleDeleteChecked = useCallback(async() => {
     // onDeleteChats(checkedChats);
     console.log("checked", checkedChats)
-    const deleted = await deleteChatsSequentially(checkedChats, userID)
+    for (const chatId of checkedChats) {
+      const deleted = await deleteChatsSequentially(chatId, userID)
+      const deletedChats = await db.deleteAllMessagesInChat(chatId);
+      console.log('deleted', deleted)
+      console.log('deletedChats', deletedChats)
+    }
+
     setCheckedChats([])
   }, [checkedChats])
 

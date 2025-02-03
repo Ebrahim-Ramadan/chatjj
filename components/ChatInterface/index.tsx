@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, FormEvent, Suspense } from "react";
+import { useState, useEffect, useCallback, FormEvent, Suspense } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { db, type ChatMessage } from "@/lib/dexie";
 import { streamChat } from "@/utils/streamChatting";
@@ -10,11 +10,8 @@ import InputForm from "./InputForm";
 import { createChat } from "@/app/actions";
 import { useUser } from "@clerk/nextjs";
 import { revalidatePath } from "next/cache";
-interface ChatInterfaceProps {
-  chatID?: string;
-  dbMessages: ChatMessage[];
-}
-export default function ChatInterface({dbMessages:initialDbMessages }: ChatInterfaceProps) {
+
+export default function ChatInterface() {
   const { chatID } = useParams();
   console.log('chatID', typeof chatID);
   
@@ -23,8 +20,29 @@ export default function ChatInterface({dbMessages:initialDbMessages }: ChatInter
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dbMessages, setDbMessages] = useState<ChatMessage[]>(initialDbMessages||[]);
+  const [dbMessages, setDbMessages] = useState<ChatMessage[]>([]);
 
+  // Fetch messages when chatID changes
+  useEffect(() => {
+    if (!chatID) {
+      console.log('none');
+      
+      return};
+
+    const fetchMessages = async () => {
+      try {
+        const messages = await db.getMessagesForChat(chatID);
+        console.log('messages', messages);
+        
+        setDbMessages(messages);
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+        setError("Failed to load messages");
+      }
+    };
+
+    fetchMessages();
+  }, [chatID]);
 
   // Handle form submission
   const handleSubmit = useCallback(
@@ -116,11 +134,9 @@ export default function ChatInterface({dbMessages:initialDbMessages }: ChatInter
               chatId: newNeonChatId.id
             }))
           );
-
+// revalidatePath('/')
           // Redirect to the new chat URL
           router.push(`/${newNeonChatId.id}`);
-      revalidatePath('/')
-
         }
       } catch (error) {
         console.error("Error:", error);
@@ -129,7 +145,7 @@ export default function ChatInterface({dbMessages:initialDbMessages }: ChatInter
         setIsLoading(false);
       }
     },
-    [input, isLoading, chatID, user, router]
+    [input, isLoading, chatID, user]
   );
 
   return (
@@ -139,10 +155,10 @@ export default function ChatInterface({dbMessages:initialDbMessages }: ChatInter
       )}
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {dbMessages?.length === 0 ? (
+        {dbMessages.length === 0 ? (
           <div className="p-4 text-gray-500 flex justify-center">Hi.</div>
         ) : (
-          dbMessages?.map((m: ChatMessage, index: number) => (
+          dbMessages.map((m: ChatMessage, index: number) => (
             <Suspense key={m.id || index} fallback={<div>Loading...</div>}>
               <ChatMessageItem key={m.id || index} message={m} />
             </Suspense>

@@ -33,9 +33,9 @@ export default async function RootLayout({
   const session = await auth();
   console.log('signed in, top level session', session);
 
-  if (!session.userId) {
-    return redirect("/sign-in");
-  }
+  // if (!session.userId) {
+  //   return redirect("/sign-in");
+  // }
 
   const userChats = await getUserChats(session.userId);
   console.log('userChats', userChats);

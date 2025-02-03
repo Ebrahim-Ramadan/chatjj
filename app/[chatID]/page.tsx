@@ -46,7 +46,8 @@ export const Home = async ({ params }: PageProps) => {
   console.log('params.chatID', params.chatID);
   
   const chatExists = userChats?.some(chat => String(chat.id) === params.chatID);
-  const chatMessages = await db.getMessagesForChat(params.chatID)
+  console.log('chatExists', chatExists);
+  
   if (!chatExists) {
     return redirect('/'); // Redirect if chatID is not found
   }
@@ -54,7 +55,7 @@ export const Home = async ({ params }: PageProps) => {
   return (
     <>
       {/* <SideBar userChats={userChats}/> */}
-      <ChatInterface dbMessages={dbMessages}/>
+      <ChatInterface />
     </>
   );
 };
