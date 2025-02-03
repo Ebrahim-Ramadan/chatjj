@@ -108,7 +108,7 @@ export const deleteChatsSequentially = async (
 
     // Log deletion for monitoring
     console.info(`Chat ${chatId} deleted for user ${userId}`);
-    revalidatePath('/')
+    // revalidatePath('/')
     return deletedChat;
   } catch (error) {
     // Error handling

@@ -9,7 +9,6 @@ import ChatMessageItem from "./ChatMessageItem";
 import InputForm from "./InputForm";
 import { createChat } from "@/app/actions";
 import { useUser } from "@clerk/nextjs";
-import { revalidatePath } from "next/cache";
 
 export default function ChatInterface() {
   const { chatID } = useParams();
@@ -26,7 +25,6 @@ export default function ChatInterface() {
   useEffect(() => {
     if (!chatID) {
       console.log('none');
-      
       return};
 
     const fetchMessages = async () => {

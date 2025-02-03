@@ -8,7 +8,7 @@ const ChatMessageItem = memo(({ message }: { message: ChatMessage }) => {
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} my-2`}>
       <div
         className={`max-w-[75%] p-3 rounded-lg text-white shadow-md ${
-          isUser ? "bg-neutral-900" : "bg-neutral-700"
+          isUser ? "bg-neutral-800" : "bg-neutral-950"
         } ${isUser ? "rounded-br-none" : "rounded-bl-none"}`}
       >
         
