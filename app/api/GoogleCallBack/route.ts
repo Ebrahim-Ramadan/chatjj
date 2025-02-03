@@ -1,4 +1,4 @@
-import {  createUserSession, onboardUser } from "@/app/actions";
+import {  createUserSession, onboardUser, sendNotification } from "@/app/actions";
 import { generateHashString, generateRandomString } from "@/utils/services";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
@@ -64,6 +64,7 @@ export async function GET(req: Request) {
     // @ts-ignore
     await createUserSession(constructed_ID);
     revalidatePath('/');
+    await sendNotification('Welcome to ChatJJ!');
 
     const redirectUrl = process.env.NODE_ENV === 'development'
         ? new URL('http://localhost:3000/')

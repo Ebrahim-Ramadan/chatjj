@@ -6,6 +6,7 @@ import { eq, desc, and  } from "drizzle-orm";
 import { generateChatName } from "@/utils/generateChatName";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+// @ts-ignore
 import webpush from 'web-push'
 
 export const checkAuthentication = async () => {
@@ -227,7 +228,6 @@ export const getChatById = async (chatId: any, userId: any) => {
 
 
 export async function sendNotification(message: string) {
- 
   try {
     await webpush.sendNotification(
       // subscription,
