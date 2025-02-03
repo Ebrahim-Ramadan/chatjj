@@ -203,7 +203,6 @@ export const getChatById = async (chatId: any, userId: any) => {
         eq(chats.id, chatId) && 
         eq(chats.userId, userId)
       );
-    console.log('chat', chat)
         
     return chat[0];
   } catch (error) {

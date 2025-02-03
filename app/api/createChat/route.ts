@@ -21,6 +21,7 @@ const userId: any = await getUser();
             userId: userId,
           })
           .returning();
+          
           revalidatePath('/')
         return NextResponse.json(newChat[0]);
       } catch (error) {
