@@ -57,12 +57,12 @@ export async function GET(req: Request) {
 
     const userData = await userResponse.json();
     console.log('userData', userData);
-    
-    const result = await onboardUser(userData.id);
+    const constructed_ID = `${userData.email}-${userData.sub}`
+    const result = await onboardUser(constructed_ID);
     console.log('result', result);
 
     // @ts-ignore
-    await createUserSession(result.id, true);
+    await createUserSession(constructed_ID);
     revalidatePath('/');
 
     const redirectUrl = process.env.NODE_ENV === 'development'

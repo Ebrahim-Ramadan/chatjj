@@ -147,11 +147,11 @@ export default function ChatInterface() {
         setIsLoading(false);
       }
     },
-    [input, isLoading, chatID, user]
+    [input, isLoading, chatID]
   );
 
   return (
-    <div className="p-4  relative h-screen flex flex-col md:ml-64">
+    <div className="p-4  relative h-screen flex flex-col md:ml-64 lg:px-56">
       {error && (
         <div className="p-4 mb-4 text-red-500 bg-red-100 rounded">{error}</div>
       )}

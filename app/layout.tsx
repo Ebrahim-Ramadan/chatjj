@@ -1,8 +1,9 @@
+// api/layout.tsx
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Toaster } from 'sonner'
 import React from 'react'
-import { getUser, getUserChats } from "@/app/actions";
+import {  checkAuthentication, getUserChats } from "@/app/actions";
 import "./globals.css";
 import { DeleteChatsWrapper } from "@/components/DeleteChatsWraper";
 import { redirect } from "next/navigation";
@@ -58,21 +59,18 @@ export const metadata: Metadata = {
 };
 
 
-export default async function RootLayout({
+export default async function layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getUser();
-  console.log('root user', user);
 
-  if (!user) {
-    console.log('no user');
-    return redirect("/sign-in");
-  }
+const userID = await checkAuthentication();
+console.log('layout root userID', userID);
 
-  const userChats = await getUserChats(user?.id);
-  console.log('userChats', userChats);
+if (!userID) {
+  return redirect("/sign-in");
+}
   return (
     <html lang="en">
       <head>
@@ -86,7 +84,7 @@ export default async function RootLayout({
       >
           <Toaster position="top-center" richColors  theme="dark"/>
         {children}
-      <DeleteChatsWrapper userChats={userChats} userID={user.id} />
+      {/* <DeleteChatsWrapper userChats={userChats} userID={user.id} /> */}
 
       </body>
     </html>

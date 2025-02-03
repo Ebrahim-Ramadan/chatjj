@@ -14,13 +14,13 @@ interface ChatLayoutProps {
 }
 
 export default async function ChatLayout({ children, params }: ChatLayoutProps) {
-  const user = await getUser();
+  const userID = await getUser();
 
-  if (!user?.id) {
+  if (!userID) {
     return redirect("/sign-in");
   }
     console.log('params.chatID', params.chatID);
-    const chatExists = await getChatById(params.chatID, user?.id);
+    const chatExists = await getChatById(params.chatID, userID);
     console.log('chatExists', chatExists);
     
     if (!chatExists) {
@@ -38,10 +38,11 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const session = await auth();
+  const userID = await getUser();
+
     // Check if chatID exists in userChats
     const chatID = (await params).chatID
-    const chat = await getChatById(chatID, session?.userId);
+    const chat = await getChatById(chatID, userID);
   return {
     title: chat?.name,
     // openGraph: {

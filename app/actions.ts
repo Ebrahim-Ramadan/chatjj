@@ -1,5 +1,4 @@
 'use server'
-'server only'
 
 import { users, chats } from "../lib/schema";
 import { db } from "@/lib/drizzle";
@@ -9,12 +8,36 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 
-
-export const getUserId = async()=> {
+export const checkAuthentication = async () => {
   const cookieStore = cookies();
-  const userId = await cookieStore.get('userID')?.value;
+  const userId = cookieStore.get('userID')?.value;
+console.log('userId', userId)
+
+  if (!userId) {
+    return false;
+  }
   return userId;
-}
+};
+export const getUser = async () => {
+  const cookieStore = cookies();
+  const userId = cookieStore.get('userID')?.value;
+
+  if (!userId) {
+    return false;
+  }
+  try {
+    const user = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, userId));
+
+    return user.length > 0 ? user[0].id : false;
+  } catch (error) {
+    console.error('Authentication check failed:', error);
+    return false;
+  }
+};
+
 
 export async function createUserSession(userId: string ) {
   const cookieStore = cookies();
@@ -23,28 +46,7 @@ export async function createUserSession(userId: string ) {
     path: '/',
     httpOnly: true,
   });
-  revalidatePath("/");
   return true;
-}
-export const getUserById = async (userId: any | number) => {
-  console.log('id', userId);
-  
-  try {
-    // const userId = typeof id === 'string' ? parseInt(id, 10) : id;
-    if (!userId) {
-      console.error('Invalid user ID:', userId);
-      return null;
-    }
-    const data = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.id, userId));
-
-    return data.length > 0 ? data[0] : null;
-  } catch (error) {
-    console.error('Error fetching user:', error);
-    return null;
-  }
 }
 
 export async function logout() {
@@ -53,20 +55,7 @@ export async function logout() {
   revalidatePath("/");
   return true;
 }
-export const getUser = async () => {
-  const userId = await getUserId();
-  console.log("User ID:", userId); // Debugging
 
-  if (!userId) return null;
-
-  const user = await getUserById(userId);
-  console.log("User:", user); // Debugging
-
-  if (user) return user;
-
-  await logout();
-  return null;
-};
 
 
 export const onboardUser = async (userId: string) => {
