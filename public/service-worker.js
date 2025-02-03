@@ -2,8 +2,8 @@ async function cacheCoreAssets() {
   const cache = await caches.open(CACHE_NAME);
   return cache.addAll([
     "/",
-    "/imdb-logo.svg",
-    "/rotten-tomatoes-logo.svg",
+    "/globe-outline-dark-2.svg",
+    "/assets/google.svg",
   ]);
 }
 
