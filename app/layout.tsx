@@ -6,8 +6,8 @@ import React from 'react'
 import {  checkAuthentication, getUserChats } from "@/app/actions";
 import "./globals.css";
 import { DeleteChatsWrapper } from "@/components/DeleteChatsWraper";
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+
+import RootLayoutClient from "./RootLayoutClient";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,7 +22,7 @@ const geistMono = localFont({
 
 
 export const metadata: Metadata = {
-  manifest: '/manifest.webmanifest', // Link to the manifest file
+  manifest: '/web.manifest', // Link to the manifest file
   themeColor: '#18181B', // This should match the theme_color in your manifest
   description: "talk to your local AI",
   icons: {
@@ -91,7 +91,10 @@ console.log('userChats', userChats);
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
           <Toaster position="top-center" richColors  theme="dark"/>
-        {children}
+          <RootLayoutClient>
+          {children}
+
+          </RootLayoutClient>
       <DeleteChatsWrapper userChats={userChats && userChats} userID={userID} />
 
       </body>
