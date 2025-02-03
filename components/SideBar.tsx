@@ -37,6 +37,10 @@ const SideBar = ({ userChats, checkedChats, onCheckChat }: SideBarProps) => {
         id="default-sidebar"
         className="fixed absolute top-0 left-0 z-30 max-w-64 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
       >
+        <div>
+          <Link href="/" className="flex items-center p-2 text-neutral-900 rounded-lg dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 group">New chat</Link>
+        </div>
+        
         <div className="h-full overflow-y-auto bg-neutral-50 dark:bg-neutral-800">
           <ul className="space-y-2 font-medium p-2">
             {userChats?.map((chat: CHAT) => (

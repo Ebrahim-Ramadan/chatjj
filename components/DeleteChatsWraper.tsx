@@ -4,7 +4,7 @@ import { deleteChatsSequentially } from "@/app/actions"
 import type React from "react"
 import { useState, useCallback } from "react"
 import SideBar from "./SideBar"
-
+import { toast } from 'sonner';
 type CHAT = {
   id: number
   name: string
@@ -31,6 +31,7 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({ userChat
     for (const chatId of checkedChats) {
       const deleted = await deleteChatsSequentially(chatId, userID)
       const deletedChats = await db.deleteAllMessagesInChat(chatId);
+      toast.success('Deleted');
       console.log('deleted', deleted)
       console.log('deletedChats', deletedChats)
     }

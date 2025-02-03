@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ClerkProvider} from '@clerk/nextjs'
-// app/[chatID]/layout.tsx
+import { Toaster } from 'sonner'
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import React from 'react'
 import { getUserChats } from "@/app/actions";
 import "./globals.css";
@@ -51,6 +50,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+          <Toaster position="top-center" richColors  theme="dark"/>
         {children}
       <DeleteChatsWrapper userChats={userChats} userID={session.userId} />
 
