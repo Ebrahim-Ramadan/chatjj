@@ -29,7 +29,7 @@ const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormP
   return (
     <form
       onSubmit={handleSubmit}
-      className="sticky bottom-0 p-2 bg-neutral-800 border-2 border-neutral-600 rounded-xl shadow-xl"
+      className="sticky bottom-0 p-2 bg-zinc-800  rounded-xl shadow-xl"
     >
       <div className="flex p-2 items-center gap-4 w-full">
         <textarea

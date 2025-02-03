@@ -7,6 +7,7 @@ import { streamChat } from "@/utils/streamChatting";
 import { generateUUID } from "@/utils/generateUUID";
 import ChatMessageItem from "./ChatMessageItem";
 import InputForm from "./InputForm";
+import UnlimitedMessages from "../UnlimitedUsages";
 
 export default function ChatInterface() {
   let { chatID } = useParams();
@@ -142,7 +143,13 @@ export default function ChatInterface() {
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {dbMessages.length === 0 ? (
-          <div className="p-4 text-gray-500 flex justify-center">Hi.</div>
+          <div className="p-4  flex justify-center w-full flex-col items-center mt-36 gap-4">
+            <p className="text-neutral-400 text-center text-xl font-semibold">
+            Hi!
+            </p>
+          <UnlimitedMessages/>
+
+          </div>
         ) : (
           dbMessages.map((m: ChatMessage, index: number) => (
             <Suspense key={m.id || index} fallback={<div>Loading...</div>}>
