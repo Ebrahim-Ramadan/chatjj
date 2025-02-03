@@ -40,7 +40,7 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({ userChat
   }, [checkedChats])
 
   return (
-    <div>
+    <>
       <SideBar userChats={userChats} checkedChats={checkedChats} onCheckChat={handleCheckChat} />
       
       <div className={`fixed bottom-0 ${checkedChats.length === 0? 'opacity-0':"opacity-100"}  transition-all duration-300 left-0 w-64 p-4 bg-neutral-100 dark:bg-neutral-700 z-50`}>
@@ -52,7 +52,7 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({ userChat
           Delete Checked ({checkedChats.length})
         </button>
       </div>
-    </div>
+    </>
   )
 }
 
