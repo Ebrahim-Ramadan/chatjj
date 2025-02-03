@@ -4,7 +4,7 @@ import React from 'react'
 import { getUserChats, onboardUser } from '@/app/actions'
 import { revalidatePath } from "next/cache";
 import ChatInterface from "@/components/ChatInterface";
-
+import {db} from '@/lib/dexie'
 interface PageProps {
   params: { chatID: string };
 }
@@ -43,7 +43,10 @@ export const Home = async ({ params }: PageProps) => {
   // }
 
   // Check if chatID exists in userChats
+  console.log('params.chatID', params.chatID);
+  
   const chatExists = userChats?.some(chat => String(chat.id) === params.chatID);
+  const chatMessages = await db.getMessagesForChat(params.chatID)
   if (!chatExists) {
     return redirect('/'); // Redirect if chatID is not found
   }
@@ -51,7 +54,7 @@ export const Home = async ({ params }: PageProps) => {
   return (
     <>
       {/* <SideBar userChats={userChats}/> */}
-      <ChatInterface />
+      <ChatInterface dbMessages={dbMessages}/>
     </>
   );
 };

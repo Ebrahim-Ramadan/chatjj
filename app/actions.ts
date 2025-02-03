@@ -1,7 +1,10 @@
 'use server'
+
+import { db as dexieDb  } from '@/lib/dexie'; 
 import { users, chats } from "../lib/schema";
 import { db } from "@/lib/drizzle";
 import { eq, desc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 
 export const onboardUser = async (userId: string) => {
@@ -79,27 +82,38 @@ export const createChat = async (userId: any, chatName: string) => {
   }
 };
 
-// Delete a chat
-export const deleteChat = async (chatId: number, userId: string) => {
-  try {
-    
-    if (!userId) {
-      return null;
-    }
-
-    const deletedChat = await db
-      .delete(chats)
-      .where(
-        eq(chats.id, chatId) && 
-        eq(chats.userId, userId)
-      )
-      .returning();
-
-    return deletedChat[0];
-  } catch (error) {
-    console.error("Error deleting chat:", error);
+// delete multiple chats (non-http drivers do not support transactions)
+export const deleteChatsSequentially = async (chatIds: number[], userId: string) => {
+  if (!userId || chatIds.length === 0) {
     return null;
   }
+
+  const deletedChats = [];
+
+  for (const chatId of chatIds) {
+    try {
+      const deletedChat = await db
+        .delete(chats)
+        .where(
+          eq(chats.id, chatId) && 
+          eq(chats.userId, userId)
+        )
+        .returning();
+        // Delete associated messages from Dexie
+      await dexieDb.deleteAllMessagesInChat(chatId);
+      if (deletedChat[0]) {
+        deletedChats.push(deletedChat[0]);
+      }
+      revalidatePath('/')
+      
+    } catch (error) {
+      console.error(`Error deleting chat ${chatId}:`, error);
+    }
+  }
+  console.log('deletedChats', deletedChats)
+  
+
+  return deletedChats;
 };
 
 // Update chat name

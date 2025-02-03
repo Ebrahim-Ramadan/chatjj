@@ -24,7 +24,7 @@ export class MyDatabase extends Dexie {
   }
 
   // Delete all messages in a specific chat
-  async deleteAllMessagesInChat(chatId: number) {
+  async deleteAllMessagesInChat(chatId: any) {
     await this.chatMessages.where('chatId').equals(chatId).delete()
   }
 

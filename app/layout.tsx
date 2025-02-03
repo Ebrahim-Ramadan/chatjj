@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ClerkProvider} from '@clerk/nextjs'
 // app/[chatID]/layout.tsx
-import {SideBar} from "@/components/Sidebar";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import React from 'react'
 import { getUserChats } from "@/app/actions";
 import "./globals.css";
+import { DeleteChatsWrapper } from "@/components/DeleteChatsWraper";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -52,7 +52,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-      <SideBar userChats={userChats} />
+      <DeleteChatsWrapper userChats={userChats} userID={session.userId} />
 
       </body>
     </html>
