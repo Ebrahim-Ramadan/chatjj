@@ -1,10 +1,8 @@
 'use server'
 
-import { db as dexieDb  } from '@/lib/dexie'; 
 import { users, chats } from "../lib/schema";
 import { db } from "@/lib/drizzle";
-import { eq, desc } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { eq, desc, and  } from "drizzle-orm";
 
 
 export const onboardUser = async (userId: string) => {
@@ -83,22 +81,38 @@ export const createChat = async (userId: any, chatName: string) => {
 };
 
 // delete multiple chats (non-http drivers do not support transactions)
-export const deleteChatsSequentially = async (chatId: any, userId: string) => {
+export const deleteChatsSequentially = async (
+  chatId: any,
+  userId: string
+): Promise<any> => {
+  try {
+    // Input validation
+    if (!userId || !chatId) {
+      console.warn('Missing required parameters: userId or chatId');
+      return null;
+    }
 
-  if (!userId && !chatId) {
-    return null;
-  }
-  const deletedChat = await db
-        .delete(chats)
-        .where(
-          eq(chats.id, chatId) && 
+    // Perform deletion with proper AND condition
+    const deletedChat = await db
+      .delete(chats)
+      .where(
+        and(
+          eq(chats.id, chatId),
           eq(chats.userId, userId)
         )
-        .returning();
+      )
+      .returning();
 
-  return deletedChat;
+    // Log deletion for monitoring
+    console.info(`Chat ${chatId} deleted for user ${userId}`);
+    
+    return deletedChat;
+  } catch (error) {
+    // Error handling
+    console.error('Error deleting chat:', error);
+    throw error;
+  }
 };
-
 // Update chat name
 export const updateChatName = async (chatId: number, userId: string, newName: string) => {
   try {
