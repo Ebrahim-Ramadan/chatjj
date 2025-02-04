@@ -16,15 +16,9 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dbMessages, setDbMessages] = useState<ChatMessage[]>([]);
-  const [currentChat, setCurrentChat] = useState<Chat | null>(null);
 
   // Fetch chat and messages when chatID changes
   useEffect(() => {
-    // if (!chatID) {
-    //   console.log('none');
-    //   return;
-      
-    // };
 
     const fetchChatAndMessages = async () => {
       try {
@@ -53,9 +47,9 @@ export default function ChatInterface() {
         let chatId;
         if (!chatID) {
           // Create a new chat
-          const newChatId = await db.addChat("New Chat"); // Default name
+          const newChatId = await db.addChat(input.split(' ').slice(0, 5).join(' ')); // Default name
           chatId = newChatId;
-          setCurrentChat({ id: newChatId, name: "New Chat", timestamp: new Date() });
+          // setCurrentChat({ id: newChatId, name: "New Chat", timestamp: new Date() });
         } else {
           chatId = parseInt(chatID, 10);
         }

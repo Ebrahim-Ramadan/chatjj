@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { toast } from "sonner";
-
+import {copyToClipboard} from "@/utils/services";
 const ChatMessageItem = memo(({ message : message }: any) => {
   console.log('message', message.content);
   
@@ -60,13 +60,13 @@ const ChatMessageItem = memo(({ message : message }: any) => {
         <code className="text-sm mt-4 block whitespace-pre">{codeContent}</code>
       </pre>
       <div
-        className="absolute top-0 right-0 px-2 mt-2 flex justify-between items-center w-full"
+        className="absolute top-0 right-0 px-2 mt-2 flex justify-between items-center w-full font-medium "
       >
-        <p className={`text-xs language-${language}`}>{language}</p>
+        <p className={`text-xs language-${language}`}>&#60;{language}&#62;</p>
         <button
-          className="rounded-lg hover:bg-neutral-600 bg-neutral-700 p-1 transition text-xs md:text-sm font-medium"
+          className="rounded-lg hover:bg-neutral-600 bg-neutral-700 p-1 transition text-xs md:text-sm "
           onClick={() => {
-            navigator.clipboard.writeText(codeContent);
+            copyToClipboard(codeContent);
             toast.success("Copied");
           }}
         >
@@ -108,7 +108,7 @@ const ChatMessageItem = memo(({ message : message }: any) => {
           !isUser && "rounded-bl-none bg-zinc-800"
         }`}
       >
-        <div className="space-y-2">
+        <div className={`space-y-2 ${isUser && "overflow-x-auto break-words"}`}>
           {message.content.split(/<think>|<\/think>/).map((part:any, index:any) => {
             if (!part.trim()) return null;
 
