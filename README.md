@@ -36,6 +36,9 @@ then run
 
 now you will see something like `[PWA] PWA support is disabled` because PWA is not supported in development, I made it that way through `next.config.mjs` [here](https://github.com/Ebrahim-Ramadan/chatjj/blob/main/next.config.mjs) with `next-pwa` package, but you can remove it if you want. (this is the recommended way by the masters)
 
+in the manifest file, I used a single high-resolution icon (512x512), the browser will automatically resize the icon as needed. However, this approach may not be ideal for all devices, as smaller icons may lose quality when resized.
+
+
 <br/>
 <br/>
 <br/>

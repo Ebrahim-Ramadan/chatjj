@@ -143,12 +143,8 @@ export default function ChatInterface() {
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {dbMessages.length === 0 ? (
-          <div className="p-4  flex justify-center w-full flex-col items-center mt-36 gap-4">
-            <p className="text-neutral-400 text-center text-xl font-semibold">
-            Hi!
-            </p>
+          <div className="p-4  flex justify-center w-full flex-col items-center mt-36 ">
           <UnlimitedMessages/>
-
           </div>
         ) : (
           dbMessages.map((m: ChatMessage, index: number) => (

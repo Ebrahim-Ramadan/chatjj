@@ -8,7 +8,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
   // redirect to home page if userID exists 
-  if (userID) {
+  if (userID && req.nextUrl.pathname != "/") {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
