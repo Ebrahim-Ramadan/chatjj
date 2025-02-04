@@ -7,7 +7,7 @@ import {  checkAuthentication, getUserChats } from "@/app/actions";
 import "./globals.css";
 import { DeleteChatsWrapper } from "@/components/DeleteChatsWraper";
 
-import RootLayoutClient from "./RootLayoutClient";
+// import RootLayoutClient from "./RootLayoutClient";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -24,13 +24,13 @@ export const viewport: Viewport = {
   themeColor: '#18181B', // This should match the theme_color in your manifest
 };
 export const metadata: Metadata = {
-  manifest: '/web.manifest', // Link to the manifest file
+  manifest: "/manifest.json", // Link to the manifest file
   // themeColor: '#18181B', // This should match the theme_color in your manifest
   description: "talk to your local AI",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: "/icons/icon.ico",
+    shortcut: "/icons/icon.ico",
+    apple: "/icons/icon.ico",
   },
   title: {
     default: 'chatjj',
@@ -61,6 +61,8 @@ export const metadata: Metadata = {
       },
     ],
   },
+  // viewport:
+  // "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover"
 };
 
 
@@ -93,10 +95,10 @@ console.log('userChats', userChats);
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
           <Toaster position="top-center" richColors  theme="dark"/>
-          <RootLayoutClient>
+          {/* <RootLayoutClient> */}
           {children}
 
-          </RootLayoutClient>
+          {/* </RootLayoutClient> */}
       <DeleteChatsWrapper userChats={userChats && userChats} userID={userID} />
 
       </body>

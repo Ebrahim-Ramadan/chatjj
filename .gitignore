@@ -37,3 +37,7 @@ yarn-error.log*
 next-env.d.ts
 
 certificates
+
+# Auto Generated PWA files
+**/public/sw.js
+**/public/workbox-*.js

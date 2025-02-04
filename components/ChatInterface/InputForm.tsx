@@ -31,7 +31,7 @@ const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormP
       onSubmit={handleSubmit}
       className="sticky bottom-0 p-2 bg-zinc-800  rounded-xl shadow-xl"
     >
-      <div className="flex p-2 items-center gap-4 w-full">
+      <div className="flex  items-center gap-4 w-full">
         <textarea
           autoFocus
           rows={1} 
@@ -40,7 +40,7 @@ const InputForm = memo(({ input, isLoading, setInput, handleSubmit }: InputFormP
             resize: "none", 
             overflowY: "auto",  
           }}
-          className="resize-none text-[rgb(var(--ds-rgb-label-1))] caret-[rgb(var(--ds-rgb-label-1))] bg-transparent border-none outline-none w-full text-white"
+          className="resize-none p-4 text-[rgb(var(--ds-rgb-label-1))] caret-[rgb(var(--ds-rgb-label-1))] bg-transparent border-none outline-none w-full text-white"
           value={input}
           placeholder="Type your message..."
           onChange={(e) => {

@@ -57,7 +57,7 @@ export default function UnlimitedMessages() {
               </span>
             ))}
           </div>
-          <InstallButton/>
+          {/* <InstallButton/> */}
         </div>
       </div>
     </div>
