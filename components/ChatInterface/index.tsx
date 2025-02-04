@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, FormEvent, Suspense } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { db, type ChatMessage } from "@/lib/dexie";
-import { streamChat } from "@/utils/streamChatting";
+import { streamChat } from "@/utils/streamChatting"; // Updated import
 import { generateUUID } from "@/utils/generateUUID";
 import ChatMessageItem from "./ChatMessageItem";
 import InputForm from "./InputForm";
@@ -12,7 +12,7 @@ import UnlimitedMessages from "../UnlimitedUsages";
 export default function ChatInterface() {
   let { chatID } = useParams();
   console.log('chatID', typeof chatID);
-  chatID = parseInt(chatID, 10)
+  chatID = parseInt(chatID, 10);
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,6 @@ export default function ChatInterface() {
       try {
         const messages = await db.getMessagesForChat(chatID);
         console.log('messages', messages);
-        
         setDbMessages(messages);
       } catch (err) {
         console.error("Error fetching messages:", err);
@@ -46,31 +45,26 @@ export default function ChatInterface() {
     async (e: FormEvent) => {
       e.preventDefault();
       if (!input.trim() || isLoading) return;
-
+  
       setIsLoading(true);
       setError(null);
-
+  
       try {
         // Generate a temporary local ID if no chatID exists
         const tempChatId = chatID || generateUUID();
-        
+  
         const userMessage: ChatMessage = {
           role: "user",
           content: input.trim(),
           timestamp: new Date(),
           chatId: tempChatId,
         };
-
+  
         // Optimistically add user message to Dexie and update local state
         const userMessageId = await db.chatMessages.add(userMessage);
         setDbMessages(prev => [...prev, { ...userMessage, id: userMessageId }]);
         setInput("");
-
-        const stream = await streamChat(input);
-        if (!stream) {
-          throw new Error("Failed to get response stream");
-        }
-
+  
         // Start the createChat API call in parallel with the streaming
         const chatCreationPromise = chatID
           ? Promise.resolve(null) // No need to create chat if chatID exists
@@ -81,12 +75,7 @@ export default function ChatInterface() {
               },
               body: JSON.stringify({ content: input.trim() }),
             }).then(res => res.json());
-
-        // Stream the response and update Dexie as the message is received
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-        let accumulatedResponse = "";
-
+  
         // Create a temporary assistant message
         const assistantMessage: ChatMessage = {
           role: "assistant",
@@ -94,32 +83,33 @@ export default function ChatInterface() {
           timestamp: new Date(),
           chatId: tempChatId,
         };
-        
+  
         // Optimistically add assistant message to Dexie and update local state
         const messageId = await db.chatMessages.add(assistantMessage);
         setDbMessages(prev => [...prev, { ...assistantMessage, id: messageId }]);
-
-        // Stream the response
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
+  
+        // Use the new streamChat function
+        let accumulatedResponse = "";
+        await streamChat(input, (chunk) => {
           accumulatedResponse += chunk;
-          
+  
           // Update Dexie and local state with accumulated response
-          await db.chatMessages.update(messageId, { content: accumulatedResponse });
-          setDbMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, content: accumulatedResponse } : msg));
-        }
-
+          db.chatMessages.update(messageId, { content: accumulatedResponse });
+          setDbMessages(prev =>
+            prev.map(msg =>
+              msg.id === messageId ? { ...msg, content: accumulatedResponse } : msg
+            )
+          );
+        });
+  
         // Wait for chat creation if needed
         const { id: newChatId } = await chatCreationPromise;
-
+  
         if (newChatId) {
           // Update all messages with the new chatId
           const messagesToUpdate = await db.chatMessages.where('chatId').equals(tempChatId).toArray();
           await Promise.all(messagesToUpdate.map(msg => db.chatMessages.update(msg.id!, { chatId: newChatId })));
-
+  
           // Update local state with new chatId
           setDbMessages(prev => prev.map(msg => ({ ...msg, chatId: newChatId })));
           router.push(`/${newChatId}`);
@@ -132,7 +122,7 @@ export default function ChatInterface() {
         setIsLoading(false);
       }
     },
-    [input, isLoading, chatID]
+    [input, isLoading, chatID, router]
   );
 
   return (
@@ -143,8 +133,8 @@ export default function ChatInterface() {
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {dbMessages.length === 0 ? (
-          <div className="p-4  flex justify-center w-full flex-col items-center mt-36 ">
-          <UnlimitedMessages/>
+          <div className="p-4 flex justify-center w-full flex-col items-center mt-36">
+            <UnlimitedMessages />
           </div>
         ) : (
           dbMessages.map((m: ChatMessage, index: number) => (
