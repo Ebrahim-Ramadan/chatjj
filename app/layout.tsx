@@ -3,11 +3,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Toaster } from 'sonner'
 import React from 'react'
-import {  checkAuthentication, getUserChats } from "@/app/actions";
 import "./globals.css";
 import { DeleteChatsWrapper } from "@/components/DeleteChatsWraper";
-
-// import RootLayoutClient from "./RootLayoutClient";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -72,16 +69,6 @@ export default async function layout({
   children: React.ReactNode;
 }>) {
 
-  const userID = await checkAuthentication();
-
-  console.log("layout root userID:", userID);
-  
-  // if (userID === null) {
-  //   console.log("No valid user session found, redirecting...");
-  //   return redirect("/sign-in");
-  // }
-const userChats = await getUserChats(userID)
-console.log('userChats', userChats);
 
   return (
     <html lang="en">
@@ -95,12 +82,8 @@ console.log('userChats', userChats);
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
           <Toaster position="top-center" richColors  theme="dark"/>
-          {/* <RootLayoutClient> */}
           {children}
-
-          {/* </RootLayoutClient> */}
-      <DeleteChatsWrapper userChats={userChats && userChats} userID={userID} />
-
+          <DeleteChatsWrapper/>
       </body>
     </html>
   );

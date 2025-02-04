@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, FormEvent, Suspense } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { db, type ChatMessage } from "@/lib/dexie";
+import { db, type ChatMessage, type Chat } from "@/lib/dexie"; // Import Chat type
 import { streamChat } from "@/utils/streamChatting"; // Updated import
 import { generateUUID } from "@/utils/generateUUID";
 import ChatMessageItem from "./ChatMessageItem";
@@ -10,34 +10,34 @@ import InputForm from "./InputForm";
 import UnlimitedMessages from "../UnlimitedUsages";
 
 export default function ChatInterface() {
-  let { chatID } = useParams();
-  console.log('chatID', typeof chatID);
-  chatID = parseInt(chatID, 10);
+  const { chatID } = useParams();
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dbMessages, setDbMessages] = useState<ChatMessage[]>([]);
+  const [currentChat, setCurrentChat] = useState<Chat | null>(null);
 
-  // Fetch messages when chatID changes
+  // Fetch chat and messages when chatID changes
   useEffect(() => {
-    if (!chatID) {
-      console.log('none');
-      return;
-    }
+    // if (!chatID) {
+    //   console.log('none');
+    //   return;
+      
+    // };
 
-    const fetchMessages = async () => {
+    const fetchChatAndMessages = async () => {
       try {
-        const messages = await db.getMessagesForChat(chatID);
+        const messages = await db.getMessagesForChat(parseInt(chatID, 10));
         console.log('messages', messages);
         setDbMessages(messages);
       } catch (err) {
-        console.error("Error fetching messages:", err);
-        setError("Failed to load messages");
+        console.error("Error fetching chat or messages:", err);
+        setError("Failed to load chat or messages");
       }
     };
 
-    fetchMessages();
+    fetchChatAndMessages();
   }, [chatID]);
 
   // Handle form submission
@@ -50,71 +50,60 @@ export default function ChatInterface() {
       setError(null);
   
       try {
-        // Generate a temporary local ID if no chatID exists
-        const tempChatId = chatID || generateUUID();
+        let chatId;
+        if (!chatID) {
+          // Create a new chat
+          const newChatId = await db.addChat("New Chat"); // Default name
+          chatId = newChatId;
+          setCurrentChat({ id: newChatId, name: "New Chat", timestamp: new Date() });
+        } else {
+          chatId = parseInt(chatID, 10);
+        }
   
+        // Check if the chatID exists
+        const existingChat = await db.getChatById(chatId);
+        if (!existingChat) {
+          // If the chat doesn't exist, return an error
+          setError("Invalid chat ID");
+          setIsLoading(false);
+          return;
+        }
+  
+        // Add user message to Dexie
         const userMessage: ChatMessage = {
           role: "user",
           content: input.trim(),
           timestamp: new Date(),
-          chatId: tempChatId,
+          chatId: chatId,
         };
-  
-        // Optimistically add user message to Dexie and update local state
         const userMessageId = await db.chatMessages.add(userMessage);
-        setDbMessages(prev => [...prev, { ...userMessage, id: userMessageId }]);
+        setDbMessages((prev) => [...prev, { ...userMessage, id: userMessageId }]);
         setInput("");
-  
-        // Start the createChat API call in parallel with the streaming
-        const chatCreationPromise = chatID
-          ? Promise.resolve(null) // No need to create chat if chatID exists
-          : fetch('/api/createChat', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ content: input.trim() }),
-            }).then(res => res.json());
   
         // Create a temporary assistant message
         const assistantMessage: ChatMessage = {
           role: "assistant",
           content: "",
           timestamp: new Date(),
-          chatId: tempChatId,
+          chatId: chatId,
         };
-  
-        // Optimistically add assistant message to Dexie and update local state
         const messageId = await db.chatMessages.add(assistantMessage);
-        setDbMessages(prev => [...prev, { ...assistantMessage, id: messageId }]);
+        setDbMessages((prev) => [...prev, { ...assistantMessage, id: messageId }]);
   
-        // Use the new streamChat function
+        // Stream the assistant's response
         let accumulatedResponse = "";
         await streamChat(input, (chunk) => {
           accumulatedResponse += chunk;
   
           // Update Dexie and local state with accumulated response
-          db.chatMessages.update(messageId, { content: accumulatedResponse });
-          setDbMessages(prev =>
-            prev.map(msg =>
+          setDbMessages((prev) =>
+            prev.map((msg) =>
               msg.id === messageId ? { ...msg, content: accumulatedResponse } : msg
             )
           );
         });
-  
-        // Wait for chat creation if needed
-        const { id: newChatId } = await chatCreationPromise;
-  
-        if (newChatId) {
-          // Update all messages with the new chatId
-          const messagesToUpdate = await db.chatMessages.where('chatId').equals(tempChatId).toArray();
-          await Promise.all(messagesToUpdate.map(msg => db.chatMessages.update(msg.id!, { chatId: newChatId })));
-  
-          // Update local state with new chatId
-          setDbMessages(prev => prev.map(msg => ({ ...msg, chatId: newChatId })));
-          router.push(`/${newChatId}`);
-          router.refresh();
-        }
+        db.chatMessages.update(messageId, { content: accumulatedResponse });
+        router.push(`/${chatId}`);
       } catch (error) {
         console.error("Error:", error);
         setError("Failed to send message. Please try again.");
@@ -127,9 +116,7 @@ export default function ChatInterface() {
 
   return (
     <div className="p-4 relative h-screen flex flex-col md:ml-64 lg:px-56 md:px-24">
-      {error && (
-        <div className="p-4 mb-4 text-red-500 bg-red-100 rounded">{error}</div>
-      )}
+    
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {dbMessages.length === 0 ? (

@@ -1,12 +1,11 @@
+
 import React, { Suspense } from 'react'
 import ChatInterface from "@/components/ChatInterface";
-import { DeleteChatsWrapper } from '@/components/DeleteChatsWraper';
+import LoadingDots from '@/components/LoadingComponent';
 export const  Home = async() => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-    {/* <SideBar userChats={userChats}/> */}
+    <Suspense fallback={<LoadingDots/>}>
 <ChatInterface />
-<DeleteChatsWrapper  userID='' />
 
     </Suspense>
   )

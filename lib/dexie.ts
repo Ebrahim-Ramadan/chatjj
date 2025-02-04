@@ -8,13 +8,21 @@ export interface ChatMessage {
   chatId: any
 }
 
+export interface Chat {
+  id?: number
+  timestamp: Date
+  name: string
+}
+
 export class MyDatabase extends Dexie {
   chatMessages!: Table<ChatMessage>
+  chats!: Table<Chat>
 
   constructor() {
-    super("chatMessages")
+    super("ChatDatabase")
     this.version(1).stores({
       chatMessages: "++id, role, chatId, timestamp",
+      chats: "++id, timestamp, name"
     })
   }
 
@@ -24,12 +32,8 @@ export class MyDatabase extends Dexie {
   }
 
   // Delete all messages in a specific chat
-  async deleteAllMessagesInChat(chatId: any) {
-    console.log('deleteAllMessagesInChat');
-    const numericChatId = typeof chatId === 'string' ? parseInt(chatId, 10) : chatId;
-    
-    await this.chatMessages.where('chatId').equals(numericChatId).delete()
-    return true
+  async deleteAllMessagesInChat(chatId: number) {
+    await this.chatMessages.where('chatId').equals(chatId).delete()
   }
 
   // Delete multiple messages by their IDs
@@ -37,10 +41,8 @@ export class MyDatabase extends Dexie {
     await this.chatMessages.bulkDelete(messageIds)
   }
 
-  // Get all messages for a specific chat
-  async getMessagesForChat(chatId: any) {
-    const numericChatId = typeof chatId === 'string' ? parseInt(chatId, 10) : chatId;
-    return await this.chatMessages.where('chatId').equals(numericChatId).toArray()
+  async getMessagesForChat(chatId: number) {
+    return await this.chatMessages.filter((message) => message.chatId === chatId).toArray();
   }
 
   // Update a message's content
@@ -70,6 +72,46 @@ export class MyDatabase extends Dexie {
     })
 
     return Array.from(chatMap.values())
+  }
+
+  // Add a new chat
+  async addChat(name: string) {
+    const id = await this.chats.add({
+      name,
+      timestamp: new Date()
+    })
+    return id
+  }
+
+  // Delete a chat and all its messages
+  async deleteChat(chatId: number) {
+    await this.chats.delete(chatId)
+    await this.deleteAllMessagesInChat(chatId)
+  }
+
+  // Delete multiple chats and all their messages
+  async deleteMultipleChats(chatIds: number[]) {
+    await this.transaction('rw', this.chats, this.chatMessages, async () => {
+      // Delete all messages associated with the chats
+      await this.chatMessages.where('chatId').anyOf(chatIds).delete();
+      // Delete the chats themselves
+      await this.chats.bulkDelete(chatIds);
+    });
+  }
+
+  // Update a chat's name
+  async updateChatName(chatId: number, newName: string) {
+    await this.chats.update(chatId, { name: newName })
+  }
+
+  // Get all chats
+  async getAllChats() {
+    return await this.chats.toArray()
+  }
+
+  // Get a specific chat by its ID
+  async getChatById(chatId: number) {
+    return await this.chats.get(chatId)
   }
 }
 

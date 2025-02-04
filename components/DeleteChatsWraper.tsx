@@ -1,67 +1,71 @@
-"use client"
+"use client";
 
-import { db } from '@/lib/dexie'
-import { deleteChatsSequentially } from "@/app/actions"
-import type React from "react"
-import { useState, useCallback, useEffect } from "react"
-import { usePathname, useRouter } from "next/navigation"
-import SideBar from "./SideBar"
+import { db } from '@/lib/dexie';
+import type React from "react";
+import { useState, useCallback, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import SideBar from "./SideBar";
 import { toast } from 'sonner';
 
 type CHAT = {
-  id: number
-  name: string
-  createdAt: Date
-  userId: string
-}
+  id: number;
+  name: string;
+  timestamp: Date; // Updated to match Dexie schema
+};
 
-interface DeleteChatsWrapperProps {
-  userChats: CHAT[]
-  userID: any
-}
+export const DeleteChatsWrapper = () => {
+  const [checkedChats, setCheckedChats] = useState<number[]>([]);
+  const [localChats, setLocalChats] = useState<CHAT[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
 
-export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
-  userChats,
-  userID,
-}) => {
-  
-  const [checkedChats, setCheckedChats] = useState<number[]>([])
-  const [localChats, setLocalChats] = useState<CHAT[]>(userChats || [])
-  
-  const router = useRouter()
-  const pathname = usePathname()
+  // Fetch chats from Dexie on component mount
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const userChats = await db.getAllChats();
+        setLocalChats(userChats);
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+        toast.error("Failed to load chats");
+      }
+    };
 
+    fetchChats();
+  }, []);
+
+  // Handle checking/unchecking a chat
   const handleCheckChat = useCallback((chatId: number) => {
     setCheckedChats((prev) =>
       prev.includes(chatId)
         ? prev.filter((id) => id !== chatId)
         : [...prev, chatId]
-    )
-  }, [])
+    );
+  }, []);
 
+  // Handle deleting checked chats
   const handleDeleteChecked = useCallback(async () => {
-    const chatsToDelete = localChats.filter(chat => checkedChats.includes(chat.id))
-    
-    setLocalChats(prevChats => prevChats.filter(chat => !checkedChats.includes(chat.id)))
-    setCheckedChats([])
+    const chatsToDelete = localChats.filter(chat => checkedChats.includes(chat.id));
+
+    // Optimistically update local state
+    setLocalChats(prevChats => prevChats.filter(chat => !checkedChats.includes(chat.id)));
+    setCheckedChats([]);
 
     try {
-      for (const chatId of checkedChats) {
-        await db.deleteAllMessagesInChat(chatId)
-        await deleteChatsSequentially(chatId, userID)
-
-        // ✅ Redirect if the current chat is being deleted
-        if (pathname.includes(`/${chatId}`)) {
-          router.push("/") // Redirect to home or another safe page
-        }
+      
+      
+      await db.deleteMultipleChats(checkedChats);
+      if (checkedChats.some(chat => pathname.includes(`/${chat}`))) {
+        router.push("/"); // Redirect to home or another safe page
       }
 
-      toast.success('Chats deleted successfully')
+      toast.success('Chats deleted successfully');
     } catch (error) {
-      setLocalChats(prevChats => [...prevChats, ...chatsToDelete])
-      toast.error('Failed to delete chats')
+      // Revert local state if deletion fails
+      setLocalChats(prevChats => [...prevChats, ...chatsToDelete]);
+      toast.error('Failed to delete chats');
     }
-  }, [checkedChats, localChats, userID, pathname, router])
+  }, [checkedChats, localChats, pathname, router]);
 
   return (
     <>
@@ -82,5 +86,5 @@ export const DeleteChatsWrapper: React.FC<DeleteChatsWrapperProps> = ({
         </button>
       </div>
     </>
-  )
-}
+  );
+};
