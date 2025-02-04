@@ -59,4 +59,5 @@ in the manifest file, I used a single high-resolution icon (512x512), the browse
 - [X] google auth
 - [X] neonDB queries and server actions & muations
 - [X] stream chat
-- [ ] dexie deletion
+- [X] dexie deletion
+- [ ] moving off neon (all local)
